@@ -1,0 +1,79 @@
+{
+  "appVersion": "1.5.0",
+  "notes": "v1.5.0 is the content-depth release: runbook library (every alarm carries a 3-5 step runbook with expected outcomes, cross-linked from the NOC detail panel, palette search and the 3D rogue inspector), per-signal why-this-matters lines in the SOC signal basis, three guidance learning tracks (executive demo / operator drill / accessibility walkthrough), a 22-term LTE glossary, synthetic UE personas in the subscriber drawer, and a how-to-read-this narrative with per-assumption hints in the business case. No new routes and no palette-count change (25 commands). Ceilings raised with documentation for the content growth: index.html 70000 -> 75000, styles.css 172000 -> 175000, app.js 270000 -> 280000, totalRuntime 510000 -> 530000, and brotliTotal 102400 -> 106000 (prose content compresses well but pushed the transfer total ~800 B past the old ceiling; gzip stays 130000).",
+  "rawBytes": {
+    "index.html": 75000,
+    "styles.css": 175000,
+    "app.js": 280000,
+    "theme-init.js": 2500,
+    "serve.js": 14000,
+    "totalRuntime": 530000
+  },
+  "plannedSplitTargets": {
+    "cssRawBytes": 81920,
+    "jsRawBytes": 122880,
+    "release": "v1.2"
+  },
+  "compressedBytes": {
+    "brotliTotal": 106000,
+    "gzipTotal": 130000
+  },
+  "performance": {
+    "lighthouseAccessibility": 1,
+    "fcpMs": 2000,
+    "lcpMs": 2500,
+    "tbtMs": 200,
+    "cls": 0.05,
+    "warmTabSwitchP75Ms": 200,
+    "firstActivationMs": 750,
+    "fps3d": 55
+  },
+  "performanceException": {
+    "release": "1.4.0",
+    "originRelease": "1.1.0",
+    "approved": "2026-11-06",
+    "note": "Performance exception originated in v1.1.0. v1.2.0, v1.3.0 and v1.4.0 include fresh Lighthouse re-measurements (see PERFORMANCE.md): accessibility 1.0 and CLS 0.000 hold on all tabs and FCP/LCP pass. TBT exceeded the gate in the v1.2.0 run (overview 378 ms, guidance 237 ms), passed on all three audited tabs in the v1.3.0 release run (113 / 200 / 151 ms), and in the v1.4.0 run passed on Overview (104-177 ms) and Guidance (132-137 ms) while NOC read 219-350 ms inside the documented range; a same-day untouched v1.3.0 control build measured NOC TBT 384 ms under identical conditions, confirming machine-state variance rather than a v1.4.0 regression. The warm tab-switch and Guidance first-activation interaction-probe budgets remain open from v1.1.1 and stay deferred to the runtime-split work.",
+    "warmTabSwitchP75Ms": {
+      "gate": 200,
+      "measuredHeadedP75": 408,
+      "observedHeadlessP75Range": [395, 568],
+      "owner": "v1.2"
+    },
+    "guidanceFirstActivationMs": {
+      "gate": 750,
+      "measured": 1096.9,
+      "owner": "v1.2"
+    },
+    "lighthouseTbtMs": {
+      "gate": 200,
+      "observedRanges": {
+        "overview": [88, 378],
+        "noc": [171, 492],
+        "guidance": [105, 338]
+      },
+      "latestReleaseRun": {
+        "release": "1.4.0",
+        "overview": 177,
+        "noc": 350,
+        "guidance": 132,
+        "result": "partial - overview and guidance pass; noc TBT remains inside the documented v1.2 exception",
+        "sameDayControl": {
+          "release": "1.3.0",
+          "noc": 384,
+          "note": "untouched v1.3.0 deliverable measured minutes later under identical conditions"
+        },
+        "lastFullPass": {
+          "release": "1.3.0",
+          "overview": 113,
+          "noc": 200,
+          "guidance": 151
+        }
+      },
+      "owner": "v1.2"
+    }
+  },
+  "targets": {
+    "minCssPx": 24,
+    "primaryMobileCssPx": 44
+  }
+}

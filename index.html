@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="VCSS 4G — a synthetic virtual cell site simulator with virtual UEs, LTE signaling traces, a deployable fake BTS scenario and an MNO business-case model.">
+<meta name="theme-color" content="#060e16">
+<meta name="app-version" content="1.5.0">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>VCSS 4G — Virtual Cell Site Simulator</title>
+<script src="theme-init.js?v=1.5.0"></script>
+<link rel="icon" href="favicon.svg?v=1.5.0" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css?v=1.5.0">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"><i id="scrollProgressBar"></i></div>
+
+<svg class="icon-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-tower" viewBox="0 0 24 24"><path d="M7 21h10M12 21V9M8.5 12.5a5 5 0 0 1 0-7M15.5 5.5a5 5 0 0 1 0 7M6 15a8.5 8.5 0 0 1 0-12M18 3a8.5 8.5 0 0 1 0 12"/><circle cx="12" cy="9" r="1.4"/></symbol>
+  <symbol id="i-signal" viewBox="0 0 24 24"><path d="M4 19v-3M8 19v-6M12 19V9M16 19V6M20 19V3"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l2.5-7 5 14 2.5-7h4"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v13M6.5 10.5 12 16l5.5-5.5M4 21h16"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.7 2.5 17a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="m6 5 9 7-9 7V5ZM19 5v14"/></symbol>
+  <symbol id="i-rewind" viewBox="0 0 24 24"><path d="m18 5-9 7 9 7V5ZM5 5v14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.1 7.5 9.5 4.4-1.4 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-3"/><rect x="7" y="14" width="10" height="7" rx="1"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 16.2a6 6 0 0 0 0-8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3"/><path d="M7.5 15h9"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5M3 17l9 5 9-5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 2.5 9 5v9l-9 5-9-5v-9l9-5Z"/><path d="M3 7.5l9 5 9-5M12 12.5v9"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M6 11h2l1.5-3 2.5 6 1.5-3h4"/></symbol>
+  <symbol id="i-orbit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6"/><ellipse cx="12" cy="12" rx="9" ry="4.6" transform="rotate(-24 12 12)"/><circle cx="19.6" cy="8.2" r="1.4"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3l1.5-2h7L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.64 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.64a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5 8.7 8.7 0 1 0 20.5 14.2Z"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.9 5.7-4.7 1.9 2.9-5.7 4.7-1.9Z"/></symbol>
+</svg>
+
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="VCSS 4G overview">
+      <span class="brand-mark"><svg class="icon"><use href="#i-tower"></use></svg></span>
+      <span class="brand-copy"><strong>VCSS <em>4G</em></strong><small>Virtual Cell Site Simulator</small></span>
+    </a>
+    <div class="top-status">
+      <span class="status-pill live"><i></i> Simulation live</span>
+      <span class="status-pill mono" id="clock">--:--:-- UTC</span>
+      <span class="status-pill" id="modePill"><i class="dot"></i><span>Nominal</span></span>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-ghost palette-trigger" id="paletteBtn" type="button" aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K" aria-label="Open command palette" title="Open command palette (Ctrl+K)">
+        <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+        <span class="palette-trigger-label">Commands</span>
+        <kbd class="palette-trigger-kbd" id="paletteKbd" aria-hidden="true">Ctrl K</kbd>
+      </button>
+      <button class="btn btn-ghost theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+        <svg class="icon theme-icon theme-icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+        <svg class="icon theme-icon theme-icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <span class="sr-only" id="themeStatus" role="status" aria-live="polite"></span>
+      <button class="btn btn-ghost" id="resetBtn" type="button" aria-label="Reset simulation"><svg class="icon"><use href="#i-reset"></use></svg><span>Reset</span></button>
+      <button class="btn btn-rogue" id="addFakeBtn" type="button" aria-label="Add fake BTS"><svg class="icon"><use href="#i-plus"></use></svg><span>Add fake BTS</span></button>
+    </div>
+  </header>
+
+  <div class="commandbar">
+    <nav class="tabs" role="tablist" aria-label="VCSS workspace">
+      <button class="tab active" id="tab-overview" data-view="overview" role="tab" aria-selected="true" aria-controls="view-overview" type="button"><svg class="icon"><use href="#i-tower"></use></svg>Overview</button>
+      <button class="tab" id="tab-noc" data-view="noc" role="tab" aria-selected="false" aria-controls="view-noc" type="button"><svg class="icon"><use href="#i-monitor"></use></svg>NOC / SOC <span class="tab-count" id="nocTabCount">3</span></button>
+      <button class="tab" id="tab-ues" data-view="ues" role="tab" aria-selected="false" aria-controls="view-ues" type="button"><svg class="icon"><use href="#i-users"></use></svg>Virtual UEs <span class="tab-count" id="ueTabCount">24</span></button>
+      <button class="tab" id="tab-signaling" data-view="signaling" role="tab" aria-selected="false" aria-controls="view-signaling" type="button"><svg class="icon"><use href="#i-activity"></use></svg>Signaling flow</button>
+      <button class="tab" id="tab-3d" data-view="3d" role="tab" aria-selected="false" aria-controls="view-3d" type="button"><svg class="icon"><use href="#i-cube"></use></svg>3D emulation</button>
+      <button class="tab" id="tab-rogue" data-view="rogue" role="tab" aria-selected="false" aria-controls="view-rogue" type="button"><svg class="icon"><use href="#i-alert"></use></svg>Fake BTS <span class="tab-alert" id="rogueTabBadge" hidden>1</span></button>
+      <button class="tab" id="tab-business" data-view="business" role="tab" aria-selected="false" aria-controls="view-business" type="button"><svg class="icon"><use href="#i-signal"></use></svg>Business case</button>
+      <button class="tab" id="tab-guidance" data-view="guidance" role="tab" aria-selected="false" aria-controls="view-guidance" type="button"><svg class="icon"><use href="#i-compass"></use></svg>Guidance</button>
+    </nav>
+    <div class="command-meta">
+      <span class="meta-chip">PLMN <b>001-01</b></span>
+      <span class="meta-chip">Band <b id="metaBand">3</b></span>
+      <span class="meta-chip">Lab <b id="labTime">--:--</b></span>
+    </div>
+  </div>
+
+  <main class="main" id="main" tabindex="-1">
+    <section class="view active" id="view-overview" role="tabpanel" aria-labelledby="tab-overview">
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow"><i></i> RAN / EPC digital twin</span>
+          <h1>Cell site overview</h1>
+          <p>A live synthetic LTE cell with virtual subscribers, control-plane telemetry and a clean baseline for rogue-cell experiments.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" id="runTraceBtn" type="button"><svg class="icon"><use href="#i-play"></use></svg>Play attach trace</button>
+          <button class="btn btn-primary" id="injectUeBtn" type="button"><svg class="icon"><use href="#i-plus"></use></svg>Inject virtual UE</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="kpiGrid">
+        <article class="kpi kpi-teal" data-kpi="attached">
+          <div class="kpi-top"><span class="kpi-label">Attached UEs</span><span class="kpi-icon"><svg class="icon"><use href="#i-users"></use></svg></span></div>
+          <div class="kpi-value"><span id="kpiAttached">18</span><small id="kpiAttachedTotal">/ 24</small></div>
+          <div class="kpi-foot"><span id="kpiAttachedSub">75% of virtual fleet</span><span class="trend" id="kpiAttachedTrend">stable</span></div>
+          <div class="kpi-bar"><i id="kpiAttachedBar" style="width:75%"></i></div>
+        </article>
+        <article class="kpi kpi-cyan" data-kpi="connected">
+          <div class="kpi-top"><span class="kpi-label">RRC connected</span><span class="kpi-icon"><svg class="icon"><use href="#i-activity"></use></svg></span></div>
+          <div class="kpi-value"><span id="kpiConnected">7</span><small>UEs</small></div>
+          <div class="kpi-foot"><span>Active bearers</span><span class="trend" id="kpiConnectedTrend">nominal</span></div>
+          <div class="kpi-bar"><i id="kpiConnectedBar" style="width:29%"></i></div>
+        </article>
+        <article class="kpi kpi-blue" data-kpi="throughput">
+          <div class="kpi-top"><span class="kpi-label">DL throughput</span><span class="kpi-icon"><svg class="icon"><use href="#i-down"></use></svg></span></div>
+          <div class="kpi-value"><span id="kpiThroughput">205.3</span><small>Mbps</small></div>
+          <div class="kpi-foot"><span>Cell aggregate</span><span class="trend up" id="kpiThroughputTrend">live</span></div>
+          <div class="kpi-bar"><i id="kpiThroughputBar" style="width:68%"></i></div>
+        </article>
+        <article class="kpi kpi-lime" data-kpi="attach">
+          <div class="kpi-top"><span class="kpi-label">Attach success</span><span class="kpi-icon"><svg class="icon"><use href="#i-check"></use></svg></span></div>
+          <div class="kpi-value"><span id="kpiAttachSuccess">99.2</span><small>%</small></div>
+          <div class="kpi-foot"><span>Rolling 15 min</span><span class="trend up" id="kpiAttachTrend">healthy</span></div>
+          <div class="kpi-bar"><i id="kpiAttachBar" style="width:99%"></i></div>
+        </article>
+        <article class="kpi kpi-amber" data-kpi="availability">
+          <div class="kpi-top"><span class="kpi-label">Cell availability</span><span class="kpi-icon"><svg class="icon"><use href="#i-clock"></use></svg></span></div>
+          <div class="kpi-value"><span id="kpiAvailability">99.98</span><small>%</small></div>
+          <div class="kpi-foot"><span>Rolling 24 h</span><span class="trend" id="kpiAvailabilityTrend">SLA met</span></div>
+          <div class="kpi-bar"><i id="kpiAvailabilityBar" style="width:99.98%"></i></div>
+        </article>
+        <article class="kpi kpi-rose" data-kpi="rogue">
+          <div class="kpi-top"><span class="kpi-label">Rogue UEs</span><span class="kpi-icon"><svg class="icon"><use href="#i-shield"></use></svg></span></div>
+          <div class="kpi-value"><span id="kpiRogue">0</span><small>UEs</small></div>
+          <div class="kpi-foot"><span id="kpiRogueSub">Clean spectrum</span><span class="trend" id="kpiRogueTrend">no anomaly</span></div>
+          <div class="kpi-bar"><i id="kpiRogueBar" style="width:0%"></i></div>
+        </article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="card span-5 control-card">
+          <div class="card-head">
+            <div><span class="kicker">VCSS control panel</span><h2>VCSS-ENB-0417</h2></div>
+            <span class="state-badge online" id="cellStateBadge"><i></i>Broadcasting</span>
+          </div>
+          <div class="cell-hero">
+            <div class="tower-visual" aria-hidden="true">
+              <span class="tower-ring r1"></span><span class="tower-ring r2"></span><span class="tower-ring r3"></span>
+              <svg viewBox="0 0 80 80" class="tower-svg"><path d="M40 68V30M27 68h26M40 30l-8 38M40 30l8 38M31 48h18M35 38h10"/><circle cx="40" cy="28" r="4"/><path d="M25 22a20 20 0 0 1 0-14M55 8a20 20 0 0 1 0 14M20 26a28 28 0 0 1 0-22M60 4a28 28 0 0 1 0 22"/></svg>
+            </div>
+            <div class="identity-grid">
+              <div><span>Cell identity</span><strong>0417 / 01</strong></div>
+              <div><span>PLMN</span><strong>001-01</strong></div>
+              <div><span>PCI</span><strong id="idPci">127</strong></div>
+              <div><span>TAC</span><strong id="idTac">4102</strong></div>
+              <div><span>EARFCN</span><strong>1850</strong></div>
+              <div><span>Band / BW</span><strong id="idBandBw">B3 · 20 MHz</strong></div>
+            </div>
+          </div>
+          <div class="control-sliders">
+            <label class="range-field"><span>Tx power <output id="txPowerOut">43 dBm</output></span><input id="txPower" type="range" min="20" max="46" step="1" value="43" aria-label="Cell transmit power"></label>
+            <label class="range-field"><span>Traffic load <output id="loadOut">62%</output></span><input id="load" type="range" min="10" max="95" step="1" value="62" aria-label="Traffic load"></label>
+          </div>
+          <div class="config-grid">
+            <label>PCI<input id="pciInput" type="number" min="0" max="503" value="127"></label>
+            <label>TAC<input id="tacInput" type="number" min="1" max="65535" value="4102"></label>
+            <label>Bandwidth<select id="bwSelect"><option value="20">20 MHz</option><option value="15">15 MHz</option><option value="10">10 MHz</option><option value="5">5 MHz</option></select></label>
+            <label>Duplex<select id="duplexSelect"><option>FDD</option><option>TDD</option></select></label>
+          </div>
+          <div class="panel-actions">
+            <button class="btn btn-primary btn-sm" id="applyConfigBtn" type="button">Apply config</button>
+            <button class="btn btn-outline btn-sm" id="broadcastBtn" type="button">Broadcast SIB</button>
+            <button class="btn btn-ghost btn-sm" id="restartBtn" type="button">Restart cell</button>
+          </div>
+          <div class="meter-block">
+            <div class="meter-row"><span>PRB utilization</span><b id="prbText">62%</b></div>
+            <div class="meter"><i id="prbBar" style="width:62%"></i></div>
+            <div class="meter-row muted"><span>Neighbor relations</span><b>3 / 3 healthy</b></div>
+          </div>
+        </article>
+
+        <article class="card span-4 topology-card">
+          <div class="card-head">
+            <div><span class="kicker">RF topology</span><h2>Coverage &amp; reselection</h2></div>
+            <span class="live-tag"><i></i>LIVE</span>
+          </div>
+          <div class="topology-wrap" id="overviewTopology" aria-label="Synthetic LTE coverage topology"></div>
+          <div class="topo-legend">
+            <span><i class="legend-dot macro"></i>Macro</span>
+            <span><i class="legend-dot connected"></i>Connected</span>
+            <span><i class="legend-dot idle"></i>Idle</span>
+            <span><i class="legend-dot rogue"></i>Rogue</span>
+          </div>
+          <div class="topo-stats">
+            <div><span>Serving cell</span><b>0417</b></div>
+            <div><span>Neighbors</span><b>3</b></div>
+            <div><span>Rogue cells</span><b id="rogueTopoCount" class="ok">0</b></div>
+          </div>
+        </article>
+
+        <article class="card span-3 feed-card">
+          <div class="card-head">
+            <div><span class="kicker">NOC stream</span><h2>Live events</h2></div>
+            <span class="live-tag"><i></i>LIVE</span>
+          </div>
+          <div class="feed" id="eventFeed"></div>
+          <p class="sr-only" id="eventStatus" role="status" aria-live="polite" aria-atomic="true"></p>
+        </article>
+
+        <article class="card span-8 ue-card">
+          <div class="card-head">
+            <div><span class="kicker">Subscriber emulation</span><h2>Virtual UE fleet</h2></div>
+            <button class="link-btn" id="viewAllUesBtn" type="button">View all <svg class="icon"><use href="#i-arrow"></use></svg></button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="overviewUeTable">
+              <caption class="sr-only">Recent virtual UEs and their serving-cell state</caption>
+              <thead><tr><th scope="col">UE</th><th scope="col">IMSI</th><th scope="col">State</th><th scope="col">Serving cell</th><th scope="col">RSRP</th><th scope="col">DL</th><th scope="col">Security</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card span-4 perf-card">
+          <div class="card-head">
+            <div><span class="kicker">Radio performance</span><h2>Downlink throughput</h2></div>
+            <span class="metric-badge" id="perfBadge">205.3 Mbps</span>
+          </div>
+          <div class="chart" id="throughputChart"></div>
+          <div class="mini-stats">
+            <div><span>Latency</span><b id="perfLatency">18 ms</b></div>
+            <div><span>Packet loss</span><b id="perfLoss">0.02%</b></div>
+            <div><span>HO success</span><b id="perfHo">99.4%</b></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="view" id="view-noc" role="tabpanel" aria-labelledby="tab-noc" hidden>
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow"><i></i> Tier-1 service assurance · security bridge</span>
+          <h1>NOC / SOC operations</h1>
+          <p>One operating picture for service alarms, security correlation and subscriber impact. Alarms are generated locally and triaged against the current VCSS scenario.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" id="exportAlarmsBtn" type="button"><svg class="icon"><use href="#i-export"></use></svg>Export alarms</button>
+          <button class="btn btn-primary" id="handoffBtn" type="button"><svg class="icon"><use href="#i-copy"></use></svg>Shift handoff</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid noc-kpis" id="nocKpis">
+        <article class="kpi kpi-teal" id="nocKpiActive">
+          <div class="kpi-top"><span class="kpi-label">Active alarms</span><span class="kpi-icon"><svg class="icon"><use href="#i-alert"></use></svg></span></div>
+          <div class="kpi-value"><span id="nocActive">3</span><small>alarms</small></div>
+          <div class="kpi-foot"><span id="nocActiveSub">0 P1 · 0 P2</span><span class="trend" id="nocActiveTrend">all minor</span></div>
+          <div class="kpi-bar"><i id="nocActiveBar" style="width:30%"></i></div>
+        </article>
+        <article class="kpi kpi-rose" id="nocKpiMajor">
+          <div class="kpi-top"><span class="kpi-label">P1 / P2 alarms</span><span class="kpi-icon"><svg class="icon"><use href="#i-radio"></use></svg></span></div>
+          <div class="kpi-value"><span id="nocP1P2">0 / 0</span><small>major</small></div>
+          <div class="kpi-foot"><span id="nocP1P2Sub">No major alarms</span><span class="trend" id="nocP1P2Trend">clear</span></div>
+          <div class="kpi-bar"><i id="nocP1P2Bar" style="width:4%"></i></div>
+        </article>
+        <article class="kpi kpi-amber">
+          <div class="kpi-top"><span class="kpi-label">Subscribers impacted</span><span class="kpi-icon"><svg class="icon"><use href="#i-users"></use></svg></span></div>
+          <div class="kpi-value"><span id="nocSubsImpact">0</span><small>modeled</small></div>
+          <div class="kpi-foot"><span id="nocSubsSub">No active service impact</span><span class="trend" id="nocSubsTrend">steady</span></div>
+          <div class="kpi-bar"><i id="nocSubsBar" style="width:0%"></i></div>
+        </article>
+        <article class="kpi kpi-cyan">
+          <div class="kpi-top"><span class="kpi-label">Revenue at risk</span><span class="kpi-icon"><svg class="icon"><use href="#i-signal"></use></svg></span></div>
+          <div class="kpi-value"><span id="nocRevenueRisk">$0</span><small>/ h</small></div>
+          <div class="kpi-foot"><span id="nocRevenueSub">ARPU model idle</span><span class="trend" id="nocRevenueTrend">nominal</span></div>
+          <div class="kpi-bar"><i id="nocRevenueBar" style="width:0%"></i></div>
+        </article>
+        <article class="kpi kpi-blue">
+          <div class="kpi-top"><span class="kpi-label">SLA credit exposure</span><span class="kpi-icon"><svg class="icon"><use href="#i-shield"></use></svg></span></div>
+          <div class="kpi-value"><span id="nocSlaRisk">$0</span><small>credits</small></div>
+          <div class="kpi-foot"><span id="nocSlaSub">No open exposure</span><span class="trend" id="nocSlaTrend">within SLA</span></div>
+          <div class="kpi-bar"><i id="nocSlaBar" style="width:0%"></i></div>
+        </article>
+        <article class="kpi kpi-lime" id="nocKpiPosture">
+          <div class="kpi-top"><span class="kpi-label">SOC posture</span><span class="kpi-icon"><svg class="icon"><use href="#i-eye"></use></svg></span></div>
+          <div class="kpi-value"><span id="nocPosture">Normal</span><small>SOC</small></div>
+          <div class="kpi-foot"><span id="nocPostureSub">0 IMSI exposures</span><span class="trend" id="nocPostureTrend">EPS-AKA</span></div>
+          <div class="kpi-bar"><i id="nocPostureBar" style="width:100%"></i></div>
+        </article>
+      </div>
+
+      <div class="dashboard-grid noc-grid">
+        <article class="card span-12 noc-cockpit-card">
+          <div class="card-head">
+            <div><span class="kicker">Incident command</span><h2 id="nocIncidentTitle">Incident cockpit</h2></div>
+            <div class="noc-head-tools"><span class="tag" id="nocIncidentStatus">Monitoring</span><button class="btn btn-outline btn-sm" type="button" data-noc-action="evidence-preview">Evidence package</button></div>
+          </div>
+          <div id="nocIncidentCockpit"></div>
+        </article>
+        <article class="card span-8 noc-alarms-card">
+          <div class="card-head">
+            <div><span class="kicker">Alarm management</span><h2>Active alarm queue</h2></div>
+            <div class="noc-head-tools">
+              <span class="live-tag danger" id="nocQueueTag"><i></i>LIVE</span>
+              <select id="nocAlarmFilter" aria-label="Filter alarms by state or severity">
+                <option value="active">Active alarms</option>
+                <option value="p1">P1 critical</option>
+                <option value="p2">P2 major</option>
+                <option value="minor">P3 / P4 minor</option>
+                <option value="ack">Acknowledged</option>
+                <option value="all">All including cleared</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap noc-alarm-wrap">
+            <table class="data-table noc-alarm-table" id="nocAlarmTable">
+              <caption class="sr-only">Active NOC and SOC alarm queue</caption>
+              <thead><tr><th scope="col">Sev</th><th scope="col">Alarm</th><th scope="col">Domain / source</th><th scope="col">Impact</th><th scope="col">Affected</th><th scope="col">Age</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="noc-table-note">Select an alarm to open its runbook and current service impact. Acknowledge or escalate from the detail panel.</p>
+        </article>
+
+        <article class="card span-4 noc-detail-card">
+          <div class="card-head"><div><span class="kicker">Selected alarm</span><h2 id="nocDetailTitle">—</h2></div><span class="sev-badge" id="nocDetailSev">—</span></div>
+          <div id="nocAlarmDetail"></div>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">Impact assessment</span><h2>Service &amp; subscriber impact</h2></div><span class="tag" id="nocImpactTag">Nominal</span></div>
+          <div id="nocImpact"></div>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">Domain health</span><h2>Service health</h2></div><span class="live-tag" id="nocHealthTag"><i></i>SYNC</span></div>
+          <div id="nocHealth"></div>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">Security operations</span><h2>SOC correlation</h2></div><span class="tag" id="nocSocTag">Nominal</span></div>
+          <div id="nocSoc"></div>
+        </article>
+
+        <article class="card span-8">
+          <div class="card-head"><div><span class="kicker">Operations log</span><h2>Alarm &amp; action stream</h2></div><span class="tag" id="nocLogCount">0 entries</span></div>
+          <div class="feed noc-log" id="nocLog" aria-live="polite"></div>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">Duty desk</span><h2>Shift &amp; response</h2></div><span class="tag" id="nocShiftTag">Shift B</span></div>
+          <div id="nocShift"></div>
+        </article>
+      </div>
+
+      <div class="assumption-note">
+        <svg class="icon"><use href="#i-flask"></use></svg>
+        <p><b>Simulation notice.</b> NOC/SOC alarms, on-call names, ticket IDs and impact figures are synthetic. Actions only change local demo state; no ticket, pager, EPC or SOC system is contacted.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-ues" role="tabpanel" aria-labelledby="tab-ues" hidden>
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow"><i></i> Synthetic subscriber layer</span>
+          <h1>Virtual UE registry</h1>
+          <p>Deterministic test subscribers with identities, radio conditions, bearers and security state. Every record is synthetic.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" id="exportUesBtn" type="button"><svg class="icon"><use href="#i-export"></use></svg>Export CSV</button>
+          <button class="btn btn-primary" id="addUeBtn" type="button"><svg class="icon"><use href="#i-plus"></use></svg>Generate UE</button>
+        </div>
+      </div>
+      <div class="mini-kpi-grid">
+        <div class="mini-kpi"><span>Registered</span><b id="ueTotal">24</b><small>virtual UEs</small></div>
+        <div class="mini-kpi"><span>Attached</span><b id="ueAttached">18</b><small>EPS attached</small></div>
+        <div class="mini-kpi"><span>Connected</span><b id="ueConnected">7</b><small>RRC active</small></div>
+        <div class="mini-kpi danger"><span>Rogue / exposed</span><b id="ueRogue">0</b><small>identity risk</small></div>
+      </div>
+      <article class="card">
+        <div class="toolbar">
+          <label class="search-field"><svg class="icon"><use href="#i-search"></use></svg><input id="ueSearch" type="search" placeholder="Search IMSI, MSISDN, device…" aria-label="Search virtual UEs" autocomplete="off"></label>
+          <select id="ueStateFilter" aria-label="Filter by state"><option value="all">All states</option><option value="attached">Attached</option><option value="connected">Connected</option><option value="idle">Idle</option><option value="rogue">Rogue</option><option value="detached">Detached</option></select>
+          <select id="ueTypeFilter" aria-label="Filter by device type"><option value="all">All device types</option><option value="Smartphone">Smartphone</option><option value="CPE">CPE</option><option value="IoT">IoT</option><option value="Tablet">Tablet</option></select>
+          <span class="result-count" id="ueResultCount">24 UEs</span>
+          <button class="btn btn-ghost btn-sm" id="refreshUesBtn" type="button"><svg class="icon"><use href="#i-reset"></use></svg>Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table ue-registry-table" id="ueTable">
+            <caption class="sr-only">Virtual UE registry with radio, security and last-procedure detail</caption>
+            <thead><tr><th scope="col">UE</th><th scope="col">IMSI</th><th scope="col">MSISDN</th><th scope="col">State</th><th scope="col">Serving</th><th scope="col">RSRP / SINR</th><th scope="col">DL / UL</th><th scope="col">Security</th><th scope="col">Last procedure</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+      <div class="split-grid">
+        <article class="card">
+          <div class="card-head"><div><span class="kicker">Fleet composition</span><h2>Device mix</h2></div><span class="tag">24 UEs</span></div>
+          <div class="hbar-list" id="fleetComposition"></div>
+        </article>
+        <article class="card">
+          <div class="card-head"><div><span class="kicker">Security posture</span><h2>Identity protection</h2></div><span class="tag">EPS-AKA</span></div>
+          <div class="security-layout">
+            <div class="donut" id="securityDonut"><div><b id="securityPct">100%</b><span>protected</span></div></div>
+            <div class="security-copy" id="securitySummary"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="view" id="view-signaling" role="tabpanel" aria-labelledby="tab-signaling" hidden>
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow"><i></i> 3GPP control plane</span>
+          <h1>Signaling flow lab</h1>
+          <p>Step through LTE attach, service request, TAU and detach procedures. Compare the managed flow with a rogue-cell identity request.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" id="playTraceBtn" type="button"><svg class="icon"><use href="#i-play"></use></svg><span>Play trace</span></button>
+        </div>
+      </div>
+      <div class="procedure-bar" id="procedureBar" role="group" aria-label="Signaling procedure">
+        <button class="procedure-btn active" data-procedure="attach" type="button" aria-pressed="true"><b>01</b> Initial attach</button>
+        <button class="procedure-btn" data-procedure="service" type="button" aria-pressed="false"><b>02</b> Service request</button>
+        <button class="procedure-btn" data-procedure="tau" type="button" aria-pressed="false"><b>03</b> Tracking area update</button>
+        <button class="procedure-btn" data-procedure="detach" type="button" aria-pressed="false"><b>04</b> Detach</button>
+        <button class="procedure-btn rogue" data-procedure="rogue" type="button" aria-pressed="false"><b>!</b> Rogue attach / IMSI exposure</button>
+      </div>
+      <div class="signaling-grid">
+        <article class="card ladder-card">
+          <div class="card-head">
+            <div><span class="kicker">Control-plane trace</span><h2 id="traceTitle">Initial EPS attach</h2></div>
+            <div class="trace-controls">
+              <button class="icon-btn" id="tracePlay" type="button" aria-label="Play trace"><svg class="icon"><use href="#i-play"></use></svg></button>
+              <button class="icon-btn" id="traceNext" type="button" aria-label="Next message"><svg class="icon"><use href="#i-next"></use></svg></button>
+              <button class="icon-btn" id="traceReset" type="button" aria-label="Reset trace"><svg class="icon"><use href="#i-rewind"></use></svg></button>
+              <select id="traceSpeed" aria-label="Trace speed"><option value="1800">1×</option><option value="1100">1.6×</option><option value="650">2.7×</option></select>
+            </div>
+          </div>
+          <div class="trace-meta">
+            <span>UE <b id="traceUe">UE-001</b></span>
+            <span>Trace <b id="traceId">TRC-8F21</b></span>
+            <span>Status <b class="ok" id="traceStatus">Ready</b></span>
+            <label class="trace-ue-select">Subject <select id="traceUeSelect" aria-label="Trace subject UE"></select></label>
+          </div>
+          <div class="lane-header" id="laneHeader"></div>
+          <div class="ladder" id="ladder"></div>
+        </article>
+        <aside class="inspector-col">
+          <article class="card inspector-card">
+            <div class="card-head"><div><span class="kicker">Message inspector</span><h2 id="inspectorTitle">Select a message</h2></div><span class="proto-badge" id="inspectorProto">—</span></div>
+            <div id="messageInspector"></div>
+          </article>
+          <article class="card protocol-card">
+            <div class="card-head"><div><span class="kicker">Protocol stack</span><h2>LTE control plane</h2></div><svg class="icon muted"><use href="#i-layers"></use></svg></div>
+            <div class="stack-list">
+              <span class="stack-chip nas">NAS <small>24.301</small></span>
+              <span class="stack-chip rrc">RRC <small>36.331</small></span>
+              <span class="stack-chip pdcp">PDCP <small>36.323</small></span>
+              <span class="stack-chip rlc">RLC <small>36.322</small></span>
+              <span class="stack-chip mac">MAC <small>36.321</small></span>
+              <span class="stack-chip phy">PHY <small>36.211</small></span>
+            </div>
+            <div class="stack-rule"></div>
+            <div class="stack-list core">
+              <span class="stack-chip s1ap">S1AP <small>36.413</small></span>
+              <span class="stack-chip s6a">S6a <small>29.272</small></span>
+              <span class="stack-chip gtp">GTP-C <small>29.274</small></span>
+            </div>
+            <p class="protocol-note">Reference points: Uu, S1-MME, S6a and S5/S8. Trace data is synthetic.</p>
+          </article>
+        </aside>
+      </div>
+      <article class="card trace-log-card">
+        <div class="card-head"><div><span class="kicker">Trace log</span><h2>Message stream</h2></div><span class="tag" id="traceCount">0 / 18</span></div>
+        <pre class="trace-log" id="traceLog">[idle] Select a procedure and press play to begin.</pre>
+      </article>
+    </section>
+
+    <section class="view" id="view-3d" role="tabpanel" aria-labelledby="tab-3d" hidden>
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow"><i></i> Volumetric RAN twin</span>
+          <h1>3D emulation</h1>
+          <p>Explore the synthetic LTE test range from cardinal or preset views, save a camera angle, and capture a labeled snapshot. All scene elements render from the same local simulation state.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" id="sceneResetBtn" type="button"><svg class="icon"><use href="#i-camera"></use></svg>Reset view</button>
+          <button class="btn btn-ghost" id="sceneOrbitBtn" type="button" aria-pressed="false"><svg class="icon"><use href="#i-orbit"></use></svg>Auto-orbit</button>
+          <button class="btn btn-ghost" id="sceneSaveViewBtn" type="button" title="Save this camera view on this device"><svg class="icon"><use href="#i-copy"></use></svg>Save view</button>
+          <button class="btn btn-ghost" id="sceneRestoreViewBtn" type="button" title="Restore the saved camera view" disabled><svg class="icon"><use href="#i-reset"></use></svg>Restore view</button>
+        </div>
+      </div>
+
+      <div class="scene-layout">
+        <article class="card scene-stage-card">
+          <div class="card-head">
+            <div><span class="kicker">Live 3D viewport</span><h2>VCSS test range</h2></div>
+            <div class="scene-head-actions">
+              <span class="live-tag" id="sceneLiveTag"><i></i>LIVE 3D</span>
+              <span class="tag" id="sceneModeTag">Nominal</span>
+              <button class="btn btn-ghost btn-sm" id="sceneSnapshotBtn" type="button" aria-label="Download 3D scene snapshot as PNG" title="Download scene snapshot as PNG"><svg class="icon"><use href="#i-export"></use></svg>Snapshot</button>
+              <button class="btn btn-ghost btn-sm" id="sceneFullscreenBtn" type="button" aria-label="Open full screen 3D view" aria-pressed="false" title="Open full screen"><svg class="icon"><use href="#i-cube"></use></svg><span id="sceneFullscreenLabel">Full screen</span></button>
+            </div>
+          </div>
+          <div class="scene-stage" id="sceneStage">
+            <canvas id="scene3d" tabindex="0" aria-label="Interactive 3D view of the synthetic RAN test range. Drag to orbit, scroll to zoom, and click a tower or virtual UE to inspect it." aria-describedby="scene3dHelp"></canvas>
+            <div class="scene-hud scene-hud-top" aria-hidden="true">
+              <span class="scene-chip" id="sceneHudState"><i class="dot"></i><b id="sceneHudMode">Nominal</b></span>
+              <span class="scene-chip mono" id="sceneHudFps">-- fps</span>
+            </div>
+            <div class="scene-hud scene-hud-bottom">
+              <span class="scene-hint">Drag to orbit · scroll to zoom · click a node</span>
+              <div class="scene-presets" role="group" aria-label="Camera presets and cardinal headings">
+                <button class="scene-preset active" data-camera="iso" type="button">Iso</button>
+                <button class="scene-preset" data-camera="top" type="button">Top</button>
+                <button class="scene-preset" data-camera="ground" type="button">Ground</button>
+                <span class="scene-preset-divider" aria-hidden="true"></span>
+                <button class="scene-preset scene-heading" data-camera="north" type="button" aria-label="View from north" title="View from north">N</button>
+                <button class="scene-preset scene-heading" data-camera="east" type="button" aria-label="View from east" title="View from east">E</button>
+                <button class="scene-preset scene-heading" data-camera="south" type="button" aria-label="View from south" title="View from south">S</button>
+                <button class="scene-preset scene-heading" data-camera="west" type="button" aria-label="View from west" title="View from west">W</button>
+              </div>
+            </div>
+            <div class="scene-vignette" aria-hidden="true"></div>
+          </div>
+          <div class="scene-legend">
+            <span><i class="legend-dot macro"></i>Macro</span>
+            <span><i class="legend-dot neighbor"></i>Neighbor</span>
+            <span><i class="legend-dot rogue-cell"></i>Fake BTS</span>
+            <span><i class="legend-dot connected"></i>Connected UE</span>
+            <span><i class="legend-dot idle"></i>Idle UE</span>
+            <span><i class="legend-dot detached"></i>Detached</span>
+          </div>
+          <p class="sr-only" id="scene3dHelp">Use the left and right arrow keys to rotate the camera, the up and down arrow keys to change elevation, plus and minus to zoom, and Home to reset the view. Camera controls include north, east, south, and west headings. Use the page buttons to save or restore a camera view on this device, download a PNG snapshot, or enter full screen. Press Escape to leave full screen.</p>
+          <p class="sr-only" id="scene3dSummary" aria-live="polite"></p>
+        </article>
+
+        <aside class="scene-side">
+          <article class="card scene-telemetry-card">
+            <div class="card-head"><div><span class="kicker">Scene telemetry</span><h2>Render state</h2></div><span class="live-tag"><i></i>SYNC</span></div>
+            <div class="scene-telemetry">
+              <div><span>Towers</span><b id="sceneTowers">4</b></div>
+              <div><span>UE nodes</span><b id="sceneUes">24</b></div>
+              <div><span>Active links</span><b id="sceneLinks">18</b></div>
+              <div><span>Rogue cells</span><b id="sceneRogue">0</b></div>
+              <div><span>Camera</span><b id="sceneCamera">—</b></div>
+              <div><span>Range</span><b id="sceneRange">—</b></div>
+              <div><span>Sector beams</span><b id="sceneBeams">12</b></div>
+              <div><span>Frame rate</span><b id="sceneFps">—</b></div>
+            </div>
+            <div class="scene-state-row"><span>Scene state</span><b id="sceneState" class="ok">Nominal</b></div>
+          </article>
+
+          <article class="card scene-inspector-card">
+            <div class="card-head"><div><span class="kicker">Node inspector</span><h2 id="sceneInspectorTitle">Select a node</h2></div><span class="proto-badge" id="sceneInspectorBadge">—</span></div>
+            <div id="sceneInspector"></div>
+          </article>
+
+          <article class="card scene-layers-card">
+            <div class="card-head"><div><span class="kicker">Emulation layers</span><h2>Scene layers</h2></div><svg class="icon muted"><use href="#i-layers"></use></svg></div>
+            <div class="layer-list">
+              <label class="layer-toggle"><span>Coverage rings</span><input type="checkbox" data-layer="coverage" checked></label>
+              <label class="layer-toggle"><span>Sector beams</span><input type="checkbox" data-layer="beams" checked></label>
+              <label class="layer-toggle"><span>Virtual UEs</span><input type="checkbox" data-layer="ues" checked></label>
+              <label class="layer-toggle"><span>Serving links</span><input type="checkbox" data-layer="links" checked></label>
+              <label class="layer-toggle"><span>Ground grid</span><input type="checkbox" data-layer="grid" checked></label>
+              <label class="layer-toggle"><span>Labels</span><input type="checkbox" data-layer="labels" checked></label>
+            </div>
+          </article>
+        </aside>
+      </div>
+
+      <div class="assumption-note">
+        <svg class="icon"><use href="#i-flask"></use></svg>
+        <p><b>Simulation notice.</b> This view is a synthetic geometry model of the VCSS test range. It does not represent live RF propagation, transmit energy, or a real network topology.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-rogue" role="tabpanel" aria-labelledby="tab-rogue" hidden>
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow rose"><i></i> Threat simulation</span>
+          <h1>Fake BTS impact lab</h1>
+          <p>Deploy a simulated rogue LTE cell, watch virtual UEs reselect, and translate the incident into MNO exposure. No RF is transmitted.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-rogue" id="addFakeBtn2" type="button"><svg class="icon"><use href="#i-plus"></use></svg><span>Add fake BTS</span></button>
+          <div class="scenario-tools" role="group" aria-label="Scenario tools">
+            <button class="btn btn-outline btn-sm" type="button" data-action="preset-baseline" title="Reset to the clean baseline"><svg class="icon"><use href="#i-reset"></use></svg>Baseline</button>
+            <button class="btn btn-outline btn-sm" type="button" data-action="preset-incident" title="Deploy GhostCell-01 and let the incident run"><svg class="icon"><use href="#i-radio"></use></svg>Incident</button>
+            <button class="btn btn-outline btn-sm" type="button" data-action="preset-aftermath" title="Fast-replay a contained incident"><svg class="icon"><use href="#i-shield"></use></svg>Aftermath</button>
+            <button class="btn btn-outline btn-sm" type="button" data-action="share-state" title="Copy the compact scenario state JSON"><svg class="icon"><use href="#i-copy"></use></svg>Copy state</button>
+            <button class="btn btn-outline btn-sm" type="button" data-action="import-state" title="Validate and apply a scenario state JSON"><svg class="icon"><use href="#i-down"></use></svg>Import state</button>
+          </div>
+        </div>
+      </div>
+      <div id="rogueEmpty"></div>
+      <div id="rogueActive" hidden>
+        <div id="rogueBanner"></div>
+        <div class="kpi-grid rogue-kpis" id="rogueKpis"></div>
+        <div class="dashboard-grid">
+          <article class="card span-7">
+            <div class="card-head"><div><span class="kicker">RF topology</span><h2>Rogue cell footprint</h2></div><span class="live-tag danger"><i></i>TRACKING</span></div>
+            <div class="topology-wrap" id="rogueTopology"></div>
+            <div class="topo-legend"><span><i class="legend-dot macro"></i>Macro</span><span><i class="legend-dot connected"></i>Managed UE</span><span><i class="legend-dot rogue"></i>Rogue UE</span><span><i class="legend-dot rogue-cell"></i>Fake BTS</span></div>
+          </article>
+          <article class="card span-5">
+            <div class="card-head"><div><span class="kicker">Rogue cell</span><h2 id="rogueName">GhostCell-01</h2></div><span class="state-badge danger" id="rogueStateBadge"><i></i>Broadcasting</span></div>
+            <div id="rogueDetail"></div>
+            <div class="section-rule"></div>
+            <h3 class="subhead">Detection evidence</h3>
+            <div class="evidence-list" id="rogueEvidence"></div>
+          </article>
+          <article class="card span-5">
+            <div class="card-head"><div><span class="kicker">Business impact</span><h2>Modeled MNO exposure</h2></div><span class="tag" id="rogueImpactTag">Scenario</span></div>
+            <div id="rogueImpact"></div>
+          </article>
+          <article class="card span-7">
+            <div class="card-head"><div><span class="kicker">Affected subscribers</span><h2>Affected virtual UEs</h2></div><span class="tag" id="rogueUeCount">0 UEs</span></div>
+            <div class="table-wrap"><table class="data-table" id="rogueUeTable"><caption class="sr-only">Virtual UEs affected by the simulated fake BTS</caption><thead><tr><th scope="col">UE</th><th scope="col">IMSI</th><th scope="col">Prior state</th><th scope="col">RSRP</th><th scope="col">Security</th><th scope="col">Status</th></tr></thead><tbody></tbody></table></div>
+          </article>
+          <article class="card span-12">
+            <div class="card-head"><div><span class="kicker">Response drill</span><h2>Containment playbook</h2></div><span class="tag" id="containTag">Ready</span></div>
+            <div class="playbook" id="containSteps"></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-business" role="tabpanel" aria-labelledby="tab-business" hidden>
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow"><i></i> Board-ready model</span>
+          <h1>MNO business case</h1>
+          <p>Translate a rogue-cell incident into revenue, care, churn and regulatory exposure — then quantify the value of validating detection with VCSS.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" id="copyCaseBtn" type="button"><svg class="icon"><use href="#i-copy"></use></svg>Copy summary</button>
+          <button class="btn btn-outline" id="downloadCaseBtn" type="button"><svg class="icon"><use href="#i-export"></use></svg>CSV</button>
+          <button class="btn btn-primary" id="printCaseBtn" type="button"><svg class="icon"><use href="#i-print"></use></svg>Print</button>
+        </div>
+      </div>
+      <div class="assumption-note">
+        <svg class="icon"><use href="#i-compass"></use></svg>
+        <p><b>How to read this.</b> Start at the top right: the hero number is the modeled cost of one rogue-cell incident. The cost anatomy card splits that cost into revenue leakage, service credits, care contacts, churn, regulatory exposure and response labor. Adjust the assumption sliders on the right — every figure on the page recomputes locally. The year-one return card then nets the annual loss avoided at the chosen detection effectiveness against the annual program cost. Everything is an illustrative expected-value model built on synthetic inputs; annotate your own finance numbers before board use.</p>
+      </div>
+      <article class="business-hero">
+        <div class="hero-copy">
+          <span class="eyebrow rose"><i></i> Executive view</span>
+          <h2>The cost of a blind spot in the RAN</h2>
+          <p id="bcNarrative"></p>
+          <div class="hero-tags"><span>6-hour incident</span><span>180k subscriber zone</span><span>1.0 incidents / year</span><span>72% detection effectiveness</span></div>
+        </div>
+        <div class="hero-number">
+          <span>Modeled incident exposure</span>
+          <strong id="bcHeroTotal">$434K</strong>
+          <small id="bcHeroSub">12,240 subscribers · 6 h</small>
+        </div>
+      </article>
+      <div class="dashboard-grid">
+        <article class="card span-7">
+          <div class="card-head"><div><span class="kicker">Cost anatomy</span><h2>Where the money goes</h2></div><span class="tag" id="bcCostTag">Per incident</span></div>
+          <div class="cost-layout">
+            <div class="donut large" id="bcDonut"><div><b id="bcDonutTotal">$434K</b><span>total</span></div></div>
+            <div class="legend-list" id="bcLegend"></div>
+          </div>
+          <div class="hbar-list impact-bars" id="bcBars"></div>
+        </article>
+        <article class="card span-5">
+          <div class="card-head"><div><span class="kicker">Scenario assumptions</span><h2>Adjust the model</h2></div><button class="link-btn" id="resetModelBtn" type="button">Reset</button></div>
+          <div class="model-controls" id="modelControls"></div>
+          <p class="model-note">Annual value is the per-incident estimate multiplied by expected incidents per year. This is an illustrative expected-value model; replace assumptions with MNO finance and incident data before commercial use.</p>
+        </article>
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">VCSS value</span><h2>Year-one return</h2></div><span class="tag">Model</span></div>
+          <div class="roi-stack">
+            <div class="roi-hero"><span>Net benefit</span><b id="bcNet">$128K</b><small id="bcRoi">69% ROI</small></div>
+          <div class="roi-row"><span>Annual loss avoided</span><b id="bcAvoided">$313K</b></div>
+            <div class="roi-row"><span>VCSS program</span><b id="bcProgram">$185K</b></div>
+            <div class="roi-row"><span>Payback</span><b id="bcPayback">7.1 months</b></div>
+            <div class="roi-row"><span>Residual risk</span><b id="bcResidual">$122K</b></div>
+          </div>
+          <div class="roi-note" id="bcRoiNote"></div>
+        </article>
+        <article class="card span-8">
+          <div class="card-head"><div><span class="kicker">Before / after</span><h2>Annual modeled cost with and without VCSS</h2></div><span class="tag">Year one</span></div>
+          <div class="compare-bars" id="bcCompare"></div>
+          <div class="board-callout" id="bcCallout"></div>
+        </article>
+      </div>
+      <div class="assumption-note">
+        <svg class="icon"><use href="#i-flask"></use></svg>
+        <p><b>Simulation notice.</b> This business case is illustrative and uses synthetic assumptions. VCSS does not transmit RF, attach to a live EPC, or interact with real subscribers. Use it to frame a defensive validation program, not as a substitute for MNO financial or regulatory review.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-guidance" role="tabpanel" aria-labelledby="tab-guidance" hidden>
+      <div class="page-head">
+        <div class="page-head-copy">
+          <span class="eyebrow"><i></i> Operator enablement</span>
+          <h1>Guidance &amp; quick start</h1>
+          <p>A short tour of the synthetic workspace, the defensive scenario, and the controls that make the lab easy to drive.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" type="button" data-action="deploy"><svg class="icon"><use href="#i-plus"></use></svg>Configure fake BTS</button>
+          <button class="btn btn-primary" type="button" data-guidance-tab="noc"><svg class="icon"><use href="#i-monitor"></use></svg>Open NOC / SOC</button>
+        </div>
+      </div>
+
+      <article class="guide-hero">
+        <div class="guide-hero-copy">
+          <span class="eyebrow teal"><i></i> Five-minute path</span>
+          <h2>See the whole story: baseline, rogue cell, response, business impact.</h2>
+          <p>Everything runs locally in the browser. Start with a healthy cell, deploy a simulated fake BTS when you are ready, then follow the evidence through the NOC, the affected UEs, and the board model.</p>
+          <div class="guide-hero-actions">
+            <button class="btn btn-primary" type="button" data-guidance-tab="overview"><svg class="icon"><use href="#i-play"></use></svg>Start with overview</button>
+            <button class="btn btn-outline" type="button" data-guidance-tab="rogue"><svg class="icon"><use href="#i-alert"></use></svg>Open fake BTS lab</button>
+          </div>
+        </div>
+        <ol class="guide-path" aria-label="Quick path through the demo">
+          <li><b>01</b><span><strong>Baseline</strong><small>Cell, fleet, KPIs</small></span></li>
+          <li><b>02</b><span><strong>Incident</strong><small>Deploy fake BTS</small></span></li>
+          <li><b>03</b><span><strong>Response</strong><small>NOC, UEs, tracing</small></span></li>
+          <li><b>04</b><span><strong>Impact</strong><small>Contain, model, report</small></span></li>
+        </ol>
+      </article>
+
+      <div class="dashboard-grid">
+        <article class="card span-7">
+          <div class="card-head"><div><span class="kicker">Workspace map</span><h2>What each tab does</h2></div><span class="tag">8 tabs</span></div>
+          <div class="guide-map">
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-tower"></use></svg></span>
+              <div class="guide-map-copy"><strong>Overview</strong><span>Cell KPIs, RF topology and live controls.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="overview" aria-label="Open Overview tab">Open<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-monitor"></use></svg></span>
+              <div class="guide-map-copy"><strong>NOC / SOC</strong><span>Alarms, service impact, SOC correlation and response actions.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="noc" aria-label="Open NOC / SOC tab">Open<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-users"></use></svg></span>
+              <div class="guide-map-copy"><strong>Virtual UEs</strong><span>Search the 24-subscriber fleet and open a UE record.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="ues" aria-label="Open Virtual UEs tab">Open<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-activity"></use></svg></span>
+              <div class="guide-map-copy"><strong>Signaling flow</strong><span>Step through attach, service request, TAU, detach and rogue traces.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="signaling" aria-label="Open Signaling flow tab">Open<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-cube"></use></svg></span>
+              <div class="guide-map-copy"><strong>3D emulation</strong><span>Orbit the synthetic range and inspect towers and UEs.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="3d" aria-label="Open 3D emulation tab">Open<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon danger"><svg class="icon"><use href="#i-alert"></use></svg></span>
+              <div class="guide-map-copy"><strong>Fake BTS</strong><span>Configure, deploy and contain the simulated rogue cell.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="rogue" aria-label="Open Fake BTS tab">Open<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-signal"></use></svg></span>
+              <div class="guide-map-copy"><strong>Business case</strong><span>Turn the incident into modeled revenue, care, churn and ROI.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="business" aria-label="Open Business case tab">Open<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row is-current">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-compass"></use></svg></span>
+              <div class="guide-map-copy"><strong>Guidance</strong><span>This page: quick start, controls, scope and LTE terms.</span></div>
+              <span class="tag">Here</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card span-5">
+          <div class="card-head"><div><span class="kicker">Guided demo</span><h2>Recommended flow</h2></div><span class="tag">About 6 min</span></div>
+          <ol class="guide-flow">
+            <li><b>1</b><div><strong>Review the baseline.</strong><span>Open Overview and confirm 24 virtual UEs, healthy KPIs and the nominal macro cell.</span></div></li>
+            <li><b>2</b><div><strong>Scan the baseline queue.</strong><span>Open NOC / SOC to see the three housekeeping alarms and the normal posture.</span></div></li>
+            <li><b>3</b><div><strong>Deploy the incident.</strong><span>In Fake BTS, choose Configure fake BTS and accept the synthetic defaults.</span></div></li>
+            <li><b>4</b><div><strong>Follow the evidence.</strong><span>Review detection evidence, affected UEs and the rogue signaling trace.</span></div></li>
+            <li><b>5</b><div><strong>Contain and verify.</strong><span>Run the containment playbook, then confirm scenario alarms auto-clear in the NOC.</span></div></li>
+            <li><b>6</b><div><strong>Quantify the impact.</strong><span>Open Business case, adjust assumptions and copy or print the summary.</span></div></li>
+          </ol>
+          <div class="guide-card-foot"><button class="btn btn-outline btn-sm" type="button" data-guidance-tab="rogue"><svg class="icon"><use href="#i-alert"></use></svg>Open fake BTS lab</button></div>
+        </article>
+
+        <article class="card span-12">
+          <div class="card-head"><div><span class="kicker">Learning tracks</span><h2>Pick a guided path</h2></div><span class="tag">3 tracks</span></div>
+          <div class="guide-map">
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-globe"></use></svg></span>
+              <div class="guide-map-copy"><strong>Executive demo <span class="tag">≈ 6 min</span></strong><span>Baseline story → deploy the fake BTS → follow the evidence → the business-case board view. No tools knowledge needed.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="overview" aria-label="Start the executive demo on the Overview tab">Start<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-monitor"></use></svg></span>
+              <div class="guide-map-copy"><strong>Operator drill <span class="tag">≈ 12 min</span></strong><span>Review the baseline queue → deploy → work the NOC cockpit and runbooks → contain → confirm auto-clear → export the shift log.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="noc" aria-label="Start the operator drill on the NOC tab">Start<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+            <div class="guide-map-row">
+              <span class="guide-map-icon"><svg class="icon"><use href="#i-eye"></use></svg></span>
+              <div class="guide-map-copy"><strong>Accessibility walkthrough <span class="tag">≈ 9 min</span></strong><span>Keyboard-only path, palette workflow, target sizes, both themes and reduced motion — verified against the audit suites.</span></div>
+              <button class="link-btn" type="button" data-guidance-tab="guidance" aria-label="Start the accessibility walkthrough on the Guidance tab">Start<svg class="icon"><use href="#i-chevron"></use></svg></button>
+            </div>
+          </div>
+          <p class="guide-hint">Tracks reuse the same eight tabs — nothing is added to the workspace and no data leaves the browser.</p>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">Controls</span><h2>Keyboard &amp; accessibility</h2></div><span class="tag">A11y</span></div>
+          <ul class="guide-keys">
+            <li><span class="guide-key-group"><kbd>Ctrl</kbd><kbd>K</kbd></span><span>Open the command palette to jump to a tab, run an action or search a UE, alarm or procedure.</span></li>
+            <li><span class="guide-key-group"><kbd>?</kbd></span><span>Open the full keyboard shortcut sheet.</span></li>
+            <li><span class="guide-key-group"><kbd>Tab</kbd></span><span>Move focus through controls. The skip link is the first stop.</span></li>
+            <li><span class="guide-key-group"><kbd>←</kbd><kbd>→</kbd><kbd>Home</kbd><kbd>End</kbd></span><span>Move between workspace tabs from the tab strip.</span></li>
+            <li><span class="guide-key-group"><kbd>↑</kbd><kbd>↓</kbd><kbd>+</kbd><kbd>−</kbd><kbd>Home</kbd></span><span>Orbit, elevate and zoom the 3D camera; Home resets the view.</span></li>
+            <li><span class="guide-key-group"><kbd>Esc</kbd></span><span>Close an open dialog or UE drawer.</span></li>
+            <li><span class="guide-key-group"><kbd>Enter</kbd><kbd>Space</kbd></span><span>Activate the focused button, link or toggle.</span></li>
+          </ul>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">Appearance</span><h2>Theme &amp; motion</h2></div><span class="tag" id="guideThemeTag">Light</span></div>
+          <p class="guide-text">The lab follows your operating system theme on first visit. Choose Light, Dark or System here, or use the sun/moon button for a quick two-state switch. Both themes cover every tab, chart, dialog and the 3D scene.</p>
+          <div class="theme-choice" role="group" aria-label="Theme preference">
+            <button class="theme-choice-btn" type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button class="theme-choice-btn" type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+            <button class="theme-choice-btn" type="button" data-theme-choice="system" aria-pressed="true">System</button>
+          </div>
+          <div class="guide-card-foot"><button class="btn btn-outline btn-sm" type="button" data-action="toggle-theme"><svg class="icon"><use href="#i-sun"></use></svg>Switch theme</button></div>
+          <p class="guide-hint">Motion respects <b>prefers-reduced-motion</b>. Decorative animation stops; the data and controls stay fully usable.</p>
+      <p class="guide-version">VCSS 4G <span id="appVersionTag">v1.2.0</span> · Foundation</p>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-head"><div><span class="kicker">Safety boundary</span><h2>Defensive only</h2></div><span class="tag danger">Synthetic</span></div>
+          <ul class="guide-scope">
+            <li><svg class="icon"><use href="#i-check"></use></svg><span>No RF transmission and no live EPC, HSS or network attachment.</span></li>
+            <li><svg class="icon"><use href="#i-check"></use></svg><span>No real subscriber identity, phone number or operator data.</span></li>
+            <li><svg class="icon"><use href="#i-check"></use></svg><span>Simulation state stays in the browser; only the theme preference is saved.</span></li>
+            <li><svg class="icon"><use href="#i-check"></use></svg><span>Built for training, detection validation and executive communication.</span></li>
+          </ul>
+          <p class="guide-hint">Use this workspace to practice defensive response, not to intercept or imitate a live network.</p>
+        </article>
+
+        <article class="card span-12">
+          <div class="card-head"><div><span class="kicker">Reference</span><h2>Terms you'll see</h2></div><span class="tag">LTE shorthand</span></div>
+          <div class="guide-glossary">
+            <div><b>PCI</b><span>Physical Cell ID 0–503 used to distinguish LTE cells on the same frequency.</span></div>
+            <div><b>TAC</b><span>Tracking Area Code that groups cells for paging and mobility.</span></div>
+            <div><b>RRC</b><span>Radio Resource Control, the air-interface control plane.</span></div>
+            <div><b>NAS</b><span>Non-Access Stratum, the UE-to-core control plane.</span></div>
+            <div><b>S1-MME</b><span>The LTE control-plane interface between eNodeB and MME.</span></div>
+            <div><b>IMSI</b><span>The subscriber identity that should only be requested after security.</span></div>
+            <div><b>EPS-AKA</b><span>The LTE authentication and key-agreement procedure.</span></div>
+            <div><b>RSRP / SINR</b><span>Signal strength and signal quality measurements used in reselection.</span></div>
+            <div><b>eNB</b><span>Evolved Node B — the LTE base station that owns the radio layer.</span></div>
+            <div><b>EPC</b><span>Evolved Packet Core, the 4G core network behind the eNodeB.</span></div>
+            <div><b>MME</b><span>Mobility Management Entity: owns attach, tracking-area and paging state.</span></div>
+            <div><b>HSS</b><span>Home Subscriber Server — the subscription and authentication database.</span></div>
+            <div><b>X2</b><span>The interface between eNodeBs used for handovers and ANR coordination.</span></div>
+            <div><b>ANR</b><span>Automatic Neighbor Relation: self-organizing discovery of neighbor cells.</span></div>
+            <div><b>PRB</b><span>Physical Resource Block, the scheduler's unit of radio capacity.</span></div>
+            <div><b>QCI</b><span>QoS Class Identifier that labels the bearer treatment a flow receives.</span></div>
+            <div><b>TAU</b><span>Tracking Area Update, the idle-mode procedure that reports UE location.</span></div>
+            <div><b>Paging</b><span>The procedure that wakes idle UEs for incoming traffic, scoped by tracking area.</span></div>
+            <div><b>PLMN</b><span>Public Land Mobile Network code that identifies the operator network.</span></div>
+            <div><b>RSRQ</b><span>Reference Signal Received Quality, the companion quality metric to RSRP.</span></div>
+            <div><b>CQI</b><span>Channel Quality Indicator the UE reports to guide downlink scheduling.</span></div>
+            <div><b>IMSI catcher</b><span>Defensive shorthand for a rogue cell that harvests identities pre-authentication — the scenario this lab rehearses.</span></div>
+          </div>
+          <p class="guide-hint">The README in this folder documents every workflow, data field and safety note in more detail.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div><span class="footer-brand">VCSS 4G</span><span>Synthetic LTE test range · defensive validation only</span></div>
+    <div class="footer-meta"><span>PLMN 001-01</span><span>3GPP Release 12 reference</span><span>No RF transmission</span></div>
+  </footer>
+</div>
+
+<div id="modalRoot"></div>
+<div id="drawerRoot"></div>
+<div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
+<script src="app.js?v=1.5.0"></script>
+</body>
+</html>
