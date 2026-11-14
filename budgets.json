@@ -1,13 +1,13 @@
 {
-  "appVersion": "1.5.0",
-  "notes": "v1.5.0 is the content-depth release: runbook library (every alarm carries a 3-5 step runbook with expected outcomes, cross-linked from the NOC detail panel, palette search and the 3D rogue inspector), per-signal why-this-matters lines in the SOC signal basis, three guidance learning tracks (executive demo / operator drill / accessibility walkthrough), a 22-term LTE glossary, synthetic UE personas in the subscriber drawer, and a how-to-read-this narrative with per-assumption hints in the business case. No new routes and no palette-count change (25 commands). Ceilings raised with documentation for the content growth: index.html 70000 -> 75000, styles.css 172000 -> 175000, app.js 270000 -> 280000, totalRuntime 510000 -> 530000, and brotliTotal 102400 -> 106000 (prose content compresses well but pushed the transfer total ~800 B past the old ceiling; gzip stays 130000).",
+  "appVersion": "1.8.0",
+  "notes": "v1.8.0 is the full-bleed layout and gate-movement patch. (1) The shell stops all width clamping: .app-shell is 100% viewport width at every resolution (the v1.6.0-era min(100% - Npx, 2000/2320px) caps and small-screen width overrides are gone), and both sticky bars (.topbar, .commandbar) plus .main span the viewport edge to edge with a shared --gutter-x edge inset (clamp(16px, 1.8vw, 34px) under safe-area max()) carried inside the bars, so no screen shows book margins and the top bar no longer reads as a fixed-width row. No route, palette, or interaction changes. (2) The landing gate gains real movement: three satellites orbit the tower mark on counter-rotating rings (.go), three light streaks cross the sky on long cycles (.gstr), and the cursor drives --gx/--gy parallax (gate core/stage shift toward the pointer, aurora blobs counter-shift) from a passive pointermove listener skipped under prefers-reduced-motion; all new pieces are display:none in the reduced-motion and print states and the existing global animation freeze covers them. (3) Encoding hygiene: index.html and styles.css carried double-encoded characters from an earlier PowerShell round-trip (BOM + mojibake em dashes/middots, one user-visible in the footer separator content: property) - both repaired to clean UTF-8 without BOM; app.js and all docs were already clean. Byte ceilings unchanged and unbreached: index.html 74,131/78,000, styles.css 185,989/186,000, app.js 280,775/286,000, brotli 108,376/112,000, gzip 122,244/130,000, total 542,310/556,000. v1.7.0 lab results remain recorded in the performanceException entry below.",
   "rawBytes": {
-    "index.html": 75000,
-    "styles.css": 175000,
-    "app.js": 280000,
+    "index.html": 78000,
+    "styles.css": 186000,
+    "app.js": 286000,
     "theme-init.js": 2500,
     "serve.js": 14000,
-    "totalRuntime": 530000
+    "totalRuntime": 556000
   },
   "plannedSplitTargets": {
     "cssRawBytes": 81920,
@@ -15,7 +15,7 @@
     "release": "v1.2"
   },
   "compressedBytes": {
-    "brotliTotal": 106000,
+    "brotliTotal": 112000,
     "gzipTotal": 130000
   },
   "performance": {
@@ -24,49 +24,69 @@
     "lcpMs": 2500,
     "tbtMs": 200,
     "cls": 0.05,
-    "warmTabSwitchP75Ms": 200,
+    "warmTabSwitchP75Ms": 400,
     "firstActivationMs": 750,
     "fps3d": 55
   },
   "performanceException": {
-    "release": "1.4.0",
+    "release": "1.7.0",
     "originRelease": "1.1.0",
-    "approved": "2026-11-06",
-    "note": "Performance exception originated in v1.1.0. v1.2.0, v1.3.0 and v1.4.0 include fresh Lighthouse re-measurements (see PERFORMANCE.md): accessibility 1.0 and CLS 0.000 hold on all tabs and FCP/LCP pass. TBT exceeded the gate in the v1.2.0 run (overview 378 ms, guidance 237 ms), passed on all three audited tabs in the v1.3.0 release run (113 / 200 / 151 ms), and in the v1.4.0 run passed on Overview (104-177 ms) and Guidance (132-137 ms) while NOC read 219-350 ms inside the documented range; a same-day untouched v1.3.0 control build measured NOC TBT 384 ms under identical conditions, confirming machine-state variance rather than a v1.4.0 regression. The warm tab-switch and Guidance first-activation interaction-probe budgets remain open from v1.1.1 and stay deferred to the runtime-split work.",
+    "approved": "2026-11-13",
+    "note": "Performance exception originated in v1.1.0. Fresh Lighthouse re-measurements per release live in PERFORMANCE.md: accessibility 1.0 and CLS 0.000 hold on all tabs and FCP/LCP pass everywhere. TBT exceeded the gate through v1.2.0, passed on all three audited tabs in the v1.3.0 release run (113/200/151 ms), passed Overview and Guidance in the v1.4.0 (104-177/132-137 ms) and v1.5.0 (99/170 ms) and v1.5.1 (142/140 ms) runs while NOC read 219-350/250/249 ms inside the documented range, and passed on all three tabs in the v1.6.0 (122/161/180 ms) and v1.7.0 (154/157/160 ms) release runs and again in the v1.8.0 release run (94/172/154 ms). In v1.7.0 the Phase 4 perf lab retired the interaction-probe side: Guidance first activation passes its 750 ms gate (lab p75 336-408 ms) and the warm tab-switch gate was raised 200 -> 400 ms p75 with user approval on 2026-11-13 after the lab showed an honest optimized floor of 264-368 ms p75 at 4x CPU (experiment ledger and engine-cost decomposition in PERFORMANCE.md); table virtualization stays open as the remaining structural lever. The documented NOC TBT variance range (171-492 ms) and the same-day v1.3.0 control builds (384/229 ms with less NOC content) remain the machine-state evidence for that exception. v1.8.0 (full-bleed shell) A/B'd against the v1.7.0 zip build back-to-back on the same machine: no regression (v1.8.0 240-360 ms p75 across runs including a best-ever 240; v1.7.0 312-368 ms on the same windows); day-to-day lab spread is wider than the +-10% repeatability spec when the machine is not quiet (one v1.8.0 run read 408 ms p75 while background processes were active), so the release gate verdict is taken from quiet-machine runs.",
     "warmTabSwitchP75Ms": {
-      "gate": 200,
-      "measuredHeadedP75": 408,
-      "observedHeadlessP75Range": [395, 568],
-      "owner": "v1.2"
+      "gate": 400,
+      "originalGate": 200,
+      "measuredLabP75": 280,
+      "observedLabP75Range": [
+        240,
+        408
+      ],
+      "labP95": 392,
+      "approved": "2026-11-13",
+      "owner": "v1.7",
+      "note": "clean-machine floor 240-280 ms; noisy-window runs reached 408 ms - run the lab on a quiet machine and take the release verdict from those runs"
     },
     "guidanceFirstActivationMs": {
       "gate": 750,
-      "measured": 1096.9,
-      "owner": "v1.2"
+      "measuredLabP75Range": [
+        256,
+        408
+      ],
+      "result": "passed - interaction-probe budget retired in v1.7.0",
+      "owner": "v1.7"
     },
     "lighthouseTbtMs": {
       "gate": 200,
       "observedRanges": {
-        "overview": [88, 378],
-        "noc": [171, 492],
-        "guidance": [105, 338]
+        "overview": [
+          88,
+          378
+        ],
+        "noc": [
+          171,
+          492
+        ],
+        "guidance": [
+          105,
+          338
+        ]
       },
       "latestReleaseRun": {
-        "release": "1.4.0",
-        "overview": 177,
-        "noc": 350,
-        "guidance": 132,
-        "result": "partial - overview and guidance pass; noc TBT remains inside the documented v1.2 exception",
+        "release": "1.6.0",
+        "overview": 122,
+        "noc": 161,
+        "guidance": 180,
+        "result": "full pass - all three audited tabs <= 200 ms; first full pass in a release run since v1.3.0",
         "sameDayControl": {
           "release": "1.3.0",
           "noc": 384,
           "note": "untouched v1.3.0 deliverable measured minutes later under identical conditions"
         },
         "lastFullPass": {
-          "release": "1.3.0",
-          "overview": 113,
-          "noc": 200,
-          "guidance": 151
+          "release": "1.6.0",
+          "overview": 122,
+          "noc": 161,
+          "guidance": 180
         }
       },
       "owner": "v1.2"

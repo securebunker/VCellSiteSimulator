@@ -205,6 +205,55 @@ const check = (name, ok, info = '') => checks.push({ name, ok: !!ok, info: ok ? 
   const dupes = await page.evaluate(() => { const ids = [...document.querySelectorAll('[id]')].map((e) => e.id); return [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))]; });
   check('No duplicate DOM IDs', dupes.length === 0, dupes.join(','));
 
+  // v1.6.0 landing gate: hashless load opens it, Escape/skip/CTA enter, deep links skip
+  await page.setViewport({ width: 1440, height: 1000, deviceScaleFactor: 1 });
+  await page.goto(BASE + '/?gate=' + Date.now(), { waitUntil: 'networkidle0' });
+  await sleep(400);
+  const gateState = await page.evaluate(() => ({
+    open: !document.querySelector('#landingGate')?.hidden,
+    dialog: document.querySelector('#landingGate')?.getAttribute('role'),
+    modal: document.querySelector('#landingGate')?.getAttribute('aria-modal'),
+    inert: document.querySelector('.app-shell')?.hasAttribute('inert'),
+    focus: document.activeElement?.id,
+    hash: location.hash,
+    ctaText: document.querySelector('#gateEnter')?.textContent.trim(),
+  }));
+  check('Gate opens on hashless load', gateState.open && gateState.dialog === 'dialog' && gateState.modal === 'true' && gateState.inert && gateState.hash === '#overview', JSON.stringify(gateState));
+  check('Gate focus lands on CTA', gateState.focus === 'gateEnter', gateState.focus);
+  check('Gate CTA label', gateState.ctaText === "Let's Simulate Telco Network", gateState.ctaText);
+
+  await page.keyboard.press('Escape');
+  await sleep(900);
+  const gateEsc = await page.evaluate(() => ({
+    closed: document.querySelector('#landingGate')?.hidden,
+    shellInert: document.querySelector('.app-shell')?.hasAttribute('inert'),
+    active: document.querySelector('.view.active')?.id,
+  }));
+  check('Escape enters the workspace', gateEsc.closed && !gateEsc.shellInert && gateEsc.active === 'view-overview', JSON.stringify(gateEsc));
+
+  await page.goto(BASE + '/?gate2=' + Date.now(), { waitUntil: 'networkidle0' });
+  await sleep(400);
+  await page.click('#gateSkip');
+  await sleep(900);
+  const gateSkip = await page.evaluate(() => ({ closed: document.querySelector('#landingGate')?.hidden, active: document.querySelector('.view.active')?.id }));
+  check('Skip button enters the workspace', gateSkip.closed && gateSkip.active === 'view-overview', JSON.stringify(gateSkip));
+
+  await page.goto(BASE + '/?gate3=' + Date.now(), { waitUntil: 'networkidle0' });
+  await sleep(400);
+  await page.click('#gateEnter');
+  await sleep(1100);
+  const gateCta = await page.evaluate(() => ({
+    closed: document.querySelector('#landingGate')?.hidden,
+    active: document.querySelector('.view.active')?.id,
+    entered: document.body.classList.contains('app-entered'),
+  }));
+  check('CTA enters the workspace', gateCta.closed && gateCta.active === 'view-overview' && gateCta.entered, JSON.stringify(gateCta));
+
+  await page.goto(BASE + '/#noc', { waitUntil: 'networkidle0' });
+  await sleep(300);
+  const gateDeep = await page.evaluate(() => ({ hidden: document.querySelector('#landingGate')?.hidden, active: document.querySelector('.view.active')?.id }));
+  check('Deep link skips the gate', gateDeep.hidden && gateDeep.active === 'view-noc', JSON.stringify(gateDeep));
+
   check('No console or page errors', errors.length === 0, errors.join(' | '));
 
   const failed = checks.filter((c) => !c.ok);

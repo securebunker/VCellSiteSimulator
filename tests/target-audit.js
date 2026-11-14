@@ -46,6 +46,22 @@ const tabs = ['overview', 'noc', 'ues', 'signaling', '3d', 'rogue', 'business', 
       console.log(`${width} ${tab}: targets=${r.targets} under24=${r.under24.length} under44=${r.under44.length} scrollW=${r.pageScrollW}`);
     }
   }
+  // v1.6.0 landing gate targets (worst case: 320px viewport)
+  await page.setViewport({ width: 320, height: 844, deviceScaleFactor: 1 });
+  await page.goto(BASE, { waitUntil: 'networkidle0' });
+  await sleep(400);
+  out.gate = await page.evaluate(() => {
+    const items = [...document.querySelectorAll('#landingGate button, #landingGate a')].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { id: el.id, cls: (el.className || '').toString().slice(0, 30), w: +r.width.toFixed(1), h: +r.height.toFixed(1) };
+    });
+    return {
+      open: !document.querySelector('#landingGate')?.hidden,
+      under24: items.filter((t) => t.w < 24 || t.h < 24),
+      items,
+    };
+  });
+  console.log(`gate: open=${out.gate.open} under24=${out.gate.under24.length}`);
   fs.writeFileSync('C:/Users/Mahmoud/AppData/Local/Temp/opencode/vcss-target-audit.json', JSON.stringify(out, null, 2));
   // print distinct patterns under24 at 390
   const seen = new Set();

@@ -217,6 +217,151 @@ Overview and Guidance **pass** the 200 ms TBT gate. NOC measured **250 ms** and 
 
 `NO_NAVSTART` operational note: on this run the flake consumed all 4 retry attempts twice in a row on a cold browser start (throwaway warm-up tab included) before the real three-tab matrix passed cleanly on the next invocation. Practical pattern for future release runs: expect the first invocation after a cold start to burn retries; re-run the matrix rather than debugging a single failed attempt.
 
+## v1.5.1 verification (11 November 2026)
+
+v1.5.1 (3D life patch: teal traffic packets macro → UE on connected serving links, rose packets UE → fake BTS on camped links — the synthetic identity-exposure read, dash flow on connected links, a dashed rogue↔macro interference arc while broadcasting, a rotating selection ring, idle/detached UE glow breathing, sector-beam shimmer, and a one-time first-activation camera fly-in) adds ~2.5 KB to `app.js` (274,890 → 277,384 B, ≤ 280,000 ceiling) with **no ceiling raise**, no new routes, and no palette-count change:
+
+| Gate | v1.5.1 result |
+| --- | --- |
+| Raw bytes | 523,767 / 530,000 (index.html 72,103/75,000 · styles.css 172,865/175,000 · app.js 277,384/280,000) |
+| Gzip | 116,941 / 130,000 |
+| Brotli | 103,904 / 106,000 |
+| Initial DOM | 1,924 / 2,000 |
+| Functional suites | **33/33 light, 33/33 dark** |
+| Phase 2 suite | 27/27 |
+| Guidance suite | 29/29 |
+| Palette suite | 34/34 (command count unchanged at 25) |
+| Browser audit | clean (version 1.5.1, zero console errors, zero external requests) |
+| Target sizes | 0 controls under 24 px |
+| 3D FPS | **60.3** (≥ 55 gate; identical to the v1.4.0 and v1.5.0 release runs — the animation pack adds no measurable renderer cost) |
+| Forced colors / 200% zoom | pass, all eight views |
+| Reduced-motion proof | canvas frame-diff: baseline moves, rogue scene moves, reduced-motion frozen (identical frames); zero console errors in all three states |
+
+**Reduced-motion proof method:** a dev-only frame-diff script checksums the live `#scene3d` canvas, waits 320–400 ms, and re-checksums. In the normal theme the checksum changes — before and after rogue deployment, so the packets, dash flow, interference arc, ring rotation, breathing, and shimmer all demonstrably run. With `prefers-reduced-motion: reduce` emulated the checksum is identical: every new animation keys off the shared `time = scene.reduced ? 0 : now` clock, so reduced motion freezes the scene to exactly the v1.5.0 static picture (packets are skipped entirely via a `now > 0` guard; the fly-in tween collapses to an instant jump through the existing reduced branch of `sceneTweenTo`).
+
+v1.5.1 release-run Lighthouse (mobile emulation, headless Edge, reports in [`tests/reports/`](tests/reports/)):
+
+| Tab | Perf | A11y | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- |
+| Overview | 0.98 | 1.0 | 1,553 ms | 1,835 ms | **142 ms** | 0.000 |
+| NOC | 0.94 | 1.0 | 1,545 ms | 1,854 ms | 249 ms | 0.000 |
+| Guidance | 0.98 | 1.0 | 1,505 ms | 1,735 ms | **140 ms** | 0.000 |
+
+Overview and Guidance **pass** the 200 ms TBT gate with margins similar to v1.5.0 (99/170 ms). NOC measured **249 ms** — within 1 ms of the v1.5.0 reading (250 ms) and inside the documented TBT exception (owner v1.2, deferred to the Phase 4 runtime-split work). The same-day v1.3.0 control (229 ms with less NOC content) continues to confirm the overage predates the content-depth releases and the spread is machine-state. As in v1.5.0, the first Lighthouse invocation after a cold browser start burned all four `NO_NAVSTART` retries; the re-run matrix above passed cleanly on the next invocation.
+
+## v1.6.0 verification (11 November 2026)
+
+v1.6.0 (arrival-gate and fluid-shell release: an animated full-screen landing gate on hashless loads whose "Let's Simulate Telco Network" CTA, skip button, and Escape all enter the workspace with a burst-and-settle transition, a fluid shell that stops clamping at 1720px — `min(100% - 56px, 2320px)` at 1920px+ — so 2K/4K screens use their width, and pointer-fine card hover/focus polish) raised the size ceilings with documentation (index.html 75,000 → 78,000, styles.css 175,000 → 186,000, app.js 280,000 → 286,000, totalRuntime 530,000 → 556,000, brotli 106,000 → 112,000; gzip unchanged):
+
+| Gate | v1.6.0 result |
+| --- | --- |
+| Raw bytes | 535,661 / 556,000 (index.html 73,873/78,000 · styles.css 181,328/186,000 · app.js 279,045/286,000) |
+| Gzip | 120,383 / 130,000 |
+| Brotli | 106,654 / 112,000 |
+| Initial DOM | 1,956 / 2,000 (the gate adds 32 nodes; deep links skip it) |
+| Functional suites | **39/39 light, 39/39 dark** (the 33 prior checks + 6 gate checks: hashless load opens the gate, focus lands on the CTA, CTA label, Escape enters, skip button enters, deep links skip) |
+| Phase 2 suite | 27/27 |
+| Guidance suite | 29/29 |
+| Palette suite | 34/34 (25 commands unchanged) |
+| Browser audit | clean (version 1.6.0, zero console errors, zero external requests) |
+| Target sizes | **0** controls under 24 px on every tab at 320/390/768 — including the gate itself (CTA and skip measured at 320 px: 0 under 24) |
+| 3D FPS | **60.3** (≥ 55 gate; identical to the v1.4.0/v1.5.0/v1.5.1 release runs) |
+| Forced colors / 200% zoom | pass, all eight views |
+| Gate motion proof | page frame-diff: the gate animates in the normal state (aurora drift, radar pings, CTA sheen) and is frozen under reduced motion; CTA entry works in both states (instant under reduce); zero console errors |
+| Fluid-width proof | `.app-shell` measures **2,320 px on a 2560 px viewport** (previously clamped at 1,720 px) |
+
+The gate is a `role="dialog"` interstitial with `aria-modal="true"` that sets `inert` on the app shell and skip link while open, traps Tab, hands focus to the CTA on open, and returns focus to the workspace on entry. Every animation is covered by the existing global `prefers-reduced-motion` block, and the JS takes an instant path in that state. Deep links (`#overview` … `#guidance`) never show the gate, which is why Lighthouse and the browser audits keep measuring the workspace directly.
+
+v1.6.0 release-run Lighthouse (mobile emulation, headless Edge, reports in [`tests/reports/`](tests/reports/)):
+
+| Tab | Perf | A11y | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- |
+| Overview | 0.98 | 1.0 | 1,585 ms | 1,832 ms | **122 ms** | 0.000 |
+| NOC | 0.97 | 1.0 | 1,626 ms | 1,908 ms | **161 ms** | 0.000 |
+| Guidance | 0.97 | 1.0 | 1,558 ms | 1,558 ms | **180 ms** | 0.000 |
+
+**All three TBT gates passed in a release run for the first time since v1.3.0** (Guidance needed one `NO_NAVSTART` retry). The documented NOC exception stays on the books — its observed range (171–492 ms across runs) reflects machine-state variance and the Phase 4 runtime-split work remains the structural fix — but this run shows the strict gate is reachable on the current build. The warm tab-switch and Guidance first-activation interaction-probe budgets remain open from v1.1.1.
+
+## v1.7.0 verification (13 November 2026)
+
+v1.7.0 is the **Phase 4 performance remediation release**, with the entry-gate motion pack and a color-scheme refresh folded in. Its centerpiece is the **perf lab** — `tests/perf-lab.js`, the repeatable interaction-probe harness the two v1.1.1 budgets have been waiting on:
+
+- **Metric definition (the reference for both interaction budgets):** Event Timing API click duration (input delay + processing + paint), measured on headless new Edge at 1440×1000 with a **4× CPU throttle** applied via CDP `Emulation.setCPUThrottlingRate`; 24 warm-switch samples and 5 guidance first-activation samples per run; scenario A warms every view once, then clicks real tab buttons rotating through all eight views; scenario B loads `#overview` fresh and clicks into Guidance for the first time. Gates are **read from [`budgets.json`](budgets.json)**, so documented raises update the lab automatically. Run-to-run repeatability was validated (±10%) before any optimization was judged.
+
+**Budget outcomes — both v1.1.1 interaction-probe budgets resolved:**
+
+| Budget | Gate | v1.1.1 measured | v1.7.0 lab result | Verdict |
+| --- | --- | --- | --- | --- |
+| Guidance first activation p75 | ≤ 750 ms | 1,096.9 ms (old method) | **256–408 ms p75** across runs | **Passes — retired** |
+| Warm tab-switch p75 @ 4× CPU | ≤ 200 ms → **raised to 400 ms** (approved 2026-11-13) | 408 ms headed (old method) | **264–368 ms p75** across runs (clean machine: 264, p95 312) | **Passes the raised gate; residual documented** |
+
+The warm-switch raise is the honest outcome of a full optimization pass: the lab baseline on the untouched v1.6.0 build was **952–1,064 ms p75**; the v1.7.0 build cuts that **~66–74%**. Per-tab medians on the clean-machine run: overview 272, NOC 256, UEs 248, signaling 184, 3D 216, rogue 288, business 216, guidance 232 — no tab above 300 ms.
+
+**Kept (the three changes that produced the cut):**
+
+1. **3D canvas resize guard** — `resizeScene3D` skips the backing-store realloc (clears + reallocates the bitmap) when size and DPR are unchanged. Alone it cut the 3D switch from 1,280 to ~688 ms.
+2. **3D resume deferral** — the decisive one. Tracing showed every warm switch back to 3D ran a **full synchronous `drawScene` inside the click handler** (the resize guard path) and the scene loop's first rAF also raced the click's paint frame — both inside the Event Timing window. `sceneSetActive` now marks the scene active before init/resize, the warm-switch resize guard no longer draws synchronously (the canvas holds its last frame), and `sceneStart` begins one frame late. The 3D switch fell **712 → 216–232 ms** and run-to-run variance collapsed (p75 spread went 480–936 → 264–368).
+3. **`contain: layout paint` on `.card`, `.kpi`, `.mini-kpi`** — bounds each card's layout/paint scope so a switch invalidates within the newly active view's own subtrees. Warm p75 1,064 → ~480 ms.
+
+**Measured and rejected (kept out of the build):**
+
+- `content-visibility: auto` on below-fold sections: slower (overview 952→1,320, NOC 984→1,376) — skip/reveal churn plus hint-to-real re-layout at switch time costs more than it saves at a 1000px viewport.
+- A `visibility: hidden` stacked tab model (all views kept laid out, probed via CSS injection before touching the app): **776 ms p75 vs 368** — the engine does more work with every view in the render tree.
+- Probes (CSS-injection A/B, Event Timing decomposition, CDP tracing, Blink invalidation tracking) ruled out: entry animations (off: 368 ≈ baseline), card shadows (off: worse), gradients (off: no gain), and a forced-layout theory around `setTab`'s `scrollY` read (A/B: no difference).
+
+**Engine-cost decomposition** (the residual): Blink invalidation tracking shows each switch destroys and rebuilds the revealed view's layout tree (~1,880 "removed from layout" invalidations) and re-resolves ~1,600 style nodes — the structural tax of the `display: none` tab model. Trace aggregates per switch at 4×: UpdateLayoutTree ~430 ms (with 76–137 ms slices), Paint ~240 ms, Layerize ~140 ms, Layout ~113 ms across main and compositor threads. The remaining ~150–200 ms over the clean-machine floor is the engine's own price of revealing a dense ~700-node view subtree at 4× throttle. The only lever of that size left is **table virtualization** (NOC/UE registry) — open as future work, not silently attempted.
+
+**Gate motion pack (entry page):** the landing gate gains drifting particles, a radar scan wedge behind the tower mark, a breathing stage, an animated title gradient pan, and a soft teal flash on entry. All transform/opacity or gate-local; the global `prefers-reduced-motion` block freezes everything and the decorative pieces are `display: none` in that state and in print. The reduced-motion frame-diff proof from v1.6.0 still applies.
+
+**Color-scheme refresh (both themes):** deeper blue-black surfaces (`--bg #050c15`, surfaces shifted blue), cooler/brighter hairlines, brighter muted text (contrast headroom), and enriched aurora/ambient washes adding an indigo hue — semantic accent hues (teal serve, rose rogue, amber warn, blue neighbor) and all text colors keep their roles. Light theme gets the parallel treatment. No accent-hue changes means accessibility contrast is preserved (a11y 1.0 held in the release Lighthouse run).
+
+**v1.7.0 release-run battery (all green):**
+
+| Gate | v1.7.0 result |
+| --- | --- |
+| Raw bytes | 539,839 / 556,000 (index.html 73,999/78,000 · styles.css 184,207/186,000 · app.js 280,218/286,000) |
+| Gzip / Brotli | 121,630 / 130,000 · 107,812 / 112,000 |
+| Functional suites | 39/39 light, 39/39 dark |
+| Phase 2 / Guidance / Palette | 27/27 · 29/29 · 34/34 |
+| Target sizes | 0 under 24 px everywhere, gate included |
+| Browser audit | clean (version 1.7.0, zero console errors, zero external requests) |
+| 3D FPS | **60** (≥ 55 gate) |
+| Perf lab (gated run) | **warm p75 264 ms ≤ 400 · guidance p75 256 ms ≤ 750 — zero failures** |
+| Lighthouse | a11y 1.0 + CLS 0.000 all tabs; TBT **154 / 157 / 160 ms — full pass** |
+
+v1.7.0 release-run Lighthouse detail:
+
+| Tab | Perf | A11y | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- |
+| Overview | 0.97 | 1.0 | 1,559 ms | 1,847 ms | **154 ms** | 0.000 |
+| NOC | 0.98 | 1.0 | 1,545 ms | 1,545 ms | **157 ms** | 0.000 |
+| Guidance | 0.97 | 1.0 | 1,550 ms | 1,550 ms | **160 ms** | 0.000 |
+
+One operational note worth keeping: during the release run, NOC Lighthouse traces failed to start (`NO_NAVSTART`) on every retry until two leftover background headless Edge processes from earlier probe runs were killed — after which NOC measured 157 ms. A same-condition earlier run had read NOC TBT 285 ms under that contention (inside the documented 171–492 ms range). Background browser load is now a documented variable for both Lighthouse **and the perf lab** (its floor moved 344→264 ms after the cleanup); run the battery on a quiet machine.
+
+## v1.8.0 verification (14 November 2026)
+
+v1.8.0 is the **full-bleed layout and gate-movement patch**: the shell drops its last width clamps (`.app-shell` is 100% viewport width at every resolution; the v1.6.0-era `min(100% − N px, 2000/2320 px)` caps and small-screen width overrides are gone) and both sticky bars span the viewport with a shared `--gutter-x` inset carried inside them. The gate gains orbiting satellites, sky streaks, and cursor parallax (CSS-var driven, wired only when `prefers-reduced-motion` does not match). It also repaired double-encoded characters (BOM + mojibake, one user-visible footer separator) that a PowerShell round-trip had left in `index.html` and `styles.css`.
+
+**Release-run battery (all green):** functional 39/39 light + dark, phase2 27/27, guidance 29/29, palette 34/34, targets 0 under 24 px, browser audit clean, 3D FPS 60.2, bytes 542,310/556,000 raw (74,131/78,000 · 185,989/186,000 · 280,775/286,000), brotli 108,376/112,000, gzip 122,244/130,000. Full-bleed verified headlessly at 1440/2560/3440 px: shell, topbar, and commandbar each measure exactly the viewport width with zero horizontal overflow; reduced-motion frames frozen, decorative pieces `display: none`, instant entry.
+
+| Tab | Perf | A11y | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- |
+| Overview | 0.98 | 1.0 | 1,560 ms | 1,807 ms | **94 ms** | 0.000 |
+| NOC | 0.97 | 1.0 | 1,551 ms | 1,551 ms | **172 ms** | 0.000 |
+| Guidance | 0.98 | 1.0 | 1,506 ms | 1,506 ms | **154 ms** | 0.000 |
+
+Perf lab (gated): **warm tab-switch p75 280 ms ≤ 400, guidance first activation 256 ms ≤ 750, zero failures.**
+
+**The full-bleed A/B — the interesting engineering note of this patch.** An early v1.8.0 lab run read warm p75 408 ms (> the 400 gate), raising the question of whether spanning the viewport wider costs layout/paint per switch. A back-to-back A/B against the **v1.7.0 zip build** (extracted and served on a separate port, interleaved run order) in the same machine state answered it:
+
+| Run (interleaved) | v1.8.0 full-bleed p75 | v1.7.0 clamped p75 |
+| --- | --- | --- |
+| 1 | 240 ms (best ever) | 368 ms |
+| 2 | 352 ms | 312 ms |
+
+No consistent difference — the two builds straddle the same noise band, and the width delta at the lab's 1440×1000 viewport is only ~3% of content area (the shell was already 1400 px there; only the bars grew). The 408 reading was machine state: lab p75 on this machine swings 240–408 ms across days/windows (beyond the lab's ±10% repeatability, i.e. environment, not measurement), so `budgets.json` now records the wider observed range [240, 408] and the rule that **release gate verdicts come from quiet-machine runs**. The final gated release run read 280 ms.
+
 ## What was tried
 
 The v1.1 work already removed the largest structural waste:

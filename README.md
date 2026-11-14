@@ -4,7 +4,7 @@ A browser-based, synthetic 4G/LTE demo for **defensive** rogue-cell and fake-BTS
 
 > **Simulation only.** VCSS 4G does not transmit RF, connect to a live EPC/HSS, or use real subscriber data. All PLMNs, IMSIs, phone numbers, radio values, and incidents are fictional and generated locally.
 
-**Current release:** v1.5.0 (11 November 2026). The content-depth release: every alarm now carries a 3–5 step runbook with an expected outcome per step (rendered in the NOC detail panel, searchable from the command palette, and one click away from the 3D rogue inspector), the SOC signal basis explains why each observed signal matters for detection, Guidance gains three learning tracks (executive demo ≈6 min, operator drill ≈12 min, accessibility walkthrough ≈9 min), the glossary grows to 22 LTE terms used in the UI, seven virtual UEs gain synthetic personas in the subscriber drawer, and the business case opens with a "how to read this" note plus a hint under each assumption slider. No new routes, no new palette commands — content-only growth inside documented ceiling raises.
+**Current release:** v1.8.0 (14 November 2026). The full-bleed layout and gate-movement patch. The UI now takes the whole screen at every resolution: the shell drops its last width clamps (the v1.6.0-era 2000/2320 px caps and every small-screen width override are gone) so `.app-shell`, the sticky **top bar**, and the command bar span the viewport edge to edge with only a shared slim `--gutter-x` inset — no more centered "book" margins on 2K/4K/ultrawide screens, and the top bar is no longer a fixed-width row floating inside the page. The landing gate gets real movement: three satellites orbit the tower mark on counter-rotating rings, light streaks occasionally cross the sky, and the cursor drives a parallax in which the headline/stage shift gently toward the pointer while the aurora blobs counter-shift (skipped under reduced motion, like every other gate animation). The patch also repaired double-encoded characters (BOM + mojibake, one user-visible in the footer separator) that a PowerShell round-trip had left in `index.html` and `styles.css`. The release run is fully green: 39/39 functional light and dark, 27/27 phase 2, 29/29 guidance, 34/34 palette, 0 sub-24px targets, clean browser audit, 3D FPS 60.2, perf lab warm p75 **280 ms ≤ 400** / guidance **256 ms ≤ 750** (an A/B against the v1.7.0 build confirmed no regression — v1.8.0 even posted a best-ever 240 ms run), and Lighthouse a11y 1.0 / CLS 0.000 with **TBT passing on all three tabs (94/172/154 ms)**. Beneath it sit the v1.7.0 perf-lab release, the v1.6.0 arrival gate, the v1.5.1 3D life pack, and the v1.5.0 content-depth release.
 
 ## Run it
 
@@ -29,7 +29,7 @@ No build step or dependencies are required.
    python -m http.server 8765
    ```
 
-3. Open `http://localhost:8765/` in a current Chromium, Firefox, or Safari browser.
+3. Open `http://localhost:8765/` in a current Chromium, Firefox, or Safari browser. The first open without a hash shows the animated arrival gate — enter with **Let's Simulate Telco Network**, the skip link, or **Escape**; deep links like `http://localhost:8765/#noc` land directly in that workspace.
 
 Opening `index.html` directly also works in most browsers, but a local server is recommended. The CSP is delivered by `serve.js` and is also present as a meta tag, so the app keeps its security baseline under a plain static server.
 
@@ -43,11 +43,15 @@ Opening `index.html` directly also works in most browsers, but a local server is
 
 ## Upgrade roadmap
 
-v1.1.0 shipped the delivery, render-invalidation, WCAG 2.2 target/focus, theme-resilience, security, and budget work. v1.1.1 added the command palette and shortcut sheet. v1.1.2 fixed the local server route, measured containment drill duration, and exposed expected incident frequency in annual ROI. v1.1.3 added cardinal 3D viewpoints, a local camera bookmark, fullscreen, and PNG snapshots. v1.2.0 upgrades NOC/SOC with incident response tracking, event context, signal explanation, and JSON evidence export. v1.3.0 delivers the resolution-readiness and UI-polish pass: readable type scale, toast click-through fix, `color-scheme` hints, safe-area and `dvh` viewport support, ultrawide shell, short-landscape rules, and a wider audit matrix. v1.4.0 delivers the operator-workflow phase: response-step completion states, alarm occurrence dedup, shift-log export, a local scenario library, shareable scenario state with validated import, and operator evidence notes; the temporary audit suites are folded into `tests/`. v1.5.0 delivers the content-depth phase: per-alarm runbooks with expected outcomes, per-signal why-lines, three guidance learning tracks, a 22-term glossary, UE personas, and the business-case reading guide with assumption hints. URL-encoded session sharing and role presets remain planned work. The optional 5G extension remains v2.0, and the offline field kit remains v2.1.
+v1.1.0 shipped the delivery, render-invalidation, WCAG 2.2 target/focus, theme-resilience, security, and budget work. v1.1.1 added the command palette and shortcut sheet. v1.1.2 fixed the local server route, measured containment drill duration, and exposed expected incident frequency in annual ROI. v1.1.3 added cardinal 3D viewpoints, a local camera bookmark, fullscreen, and PNG snapshots. v1.2.0 upgrades NOC/SOC with incident response tracking, event context, signal explanation, and JSON evidence export. v1.3.0 delivers the resolution-readiness and UI-polish pass: readable type scale, toast click-through fix, `color-scheme` hints, safe-area and `dvh` viewport support, ultrawide shell, short-landscape rules, and a wider audit matrix. v1.4.0 delivers the operator-workflow phase: response-step completion states, alarm occurrence dedup, shift-log export, a local scenario library, shareable scenario state with validated import, and operator evidence notes; the temporary audit suites are folded into `tests/`. v1.5.0 delivers the content-depth phase: per-alarm runbooks with expected outcomes, per-signal why-lines, three guidance learning tracks, a 22-term glossary, UE personas, and the business-case reading guide with assumption hints. v1.5.1 delivers the 3D life patch: traffic packets on serving links (teal macro → UE, rose UE → fake BTS), dash flow on connected links, a rogue↔macro interference arc, a rotating selection ring, UE glow breathing, sector-beam shimmer, and a one-time first-activation camera fly-in — all frozen under reduced motion. v1.6.0 delivers the arrival-gate and fluid-shell pass: an animated landing gate on hashless loads with a working **Let's Simulate Telco Network** CTA (skip and Escape enter too), a shell that stretches to 2320 px on wide screens instead of clamping at 1720 px, and pointer-fine card hover/focus polish. v1.7.0 delivers the Phase 4 performance remediation: the repeatable perf lab retires both v1.1.1 interaction-probe budgets (Guidance first activation passes; warm tab-switch p75 cut 66–74% and its gate raised to a documented 400 ms), the 3D scene never blocks a tab switch's first paint, cards carry `contain: layout paint`, the landing gate gains a richer motion pack, and both themes get a color-scheme refresh. v1.8.0 makes the shell full-bleed at every resolution (no width clamps, slim shared gutter, bars edge to edge) and adds gate movement: orbiting satellites, sky streaks, and cursor parallax. URL-encoded session sharing and role presets remain planned work. The optional 5G extension remains v2.0, and the offline field kit remains v2.1.
 
 See [UPGRADE-PLAN.md](UPGRADE-PLAN.md) for the measured audit, research references, priorities, effort ranges, acceptance criteria, and explicit non-goals. See [FULL-UPGRADE-PLAN.md](FULL-UPGRADE-PLAN.md) for the consolidated site-functions/content/UI upgrade plan that drove v1.3.0 and maps the next phases. See [PERFORMANCE.md](PERFORMANCE.md) for the release measurements and the documented TBT exception, and [UX-ENHANCEMENTS.md](UX-ENHANCEMENTS.md) for the post-v1.1 UI/UX and 3D enhancement package review.
 
 ## What to explore
+
+### Arrival gate
+- Opening the app with no hash shows a full-screen animated intro: drifting aurora and floating particles, three satellites orbiting the tower mark on counter-rotating rings, occasional light streaks across the sky, a radar ping ring with a rotating scan wedge, floating telemetry chips, an animated gradient headline, and a glowing **Let's Simulate Telco Network** CTA with a sheen sweep. The cursor adds parallax — the stage shifts toward it while the aurora counter-shifts. Clicking the CTA — or pressing **Escape**, or the skip link — plays a burst-and-flash transition and settles into the Overview.
+- Any deep link, including every Guidance link and bookmark, lands directly in that workspace; the gate appears only on hashless loads. It traps focus, marks the app behind it `inert`, and freezes completely under reduced motion (decorative pieces are removed and parallax is not wired in that state).
 
 ### Overview
 - Synthetic `VCSS-ENB-0417` macro cell on PLMN `001-01`.
@@ -99,6 +103,8 @@ See [UPGRADE-PLAN.md](UPGRADE-PLAN.md) for the measured audit, research referenc
 - Inspector actions can open the full UE record, focus the camera on a node, or jump to the fake BTS incident.
 - Layer toggles isolate coverage rings, sector beams, UEs, serving links, the ground grid, and labels.
 - The scene reads directly from the simulation state. Deploying a fake BTS adds a red rogue tower, affected UEs, dashed rogue links, and pulsing coverage rings; containment turns the tower into preserved grey evidence, and **Reset** returns the scene to nominal.
+- The range is alive by default: teal traffic packets flow macro → UE on connected links, rose packets flow UE → the fake BTS on camped links (the identity-exposure read), connected links carry slow dash flow like rogue links, and a dashed rose interference arc pulses between the fake BTS and the macro apex while it broadcasts. Idle and detached UE glows breathe, sector beams shimmer, and the selected tower's dashed ground ring rotates.
+- The first 3D activation eases the camera in from a wider, higher vantage into the Iso view (one time, about 1.1 s). Every scene animation keys off the shared clock and freezes to the same static picture under reduced motion.
 - Keyboard controls on the canvas: left/right arrows orbit, up/down arrows change elevation, `+`/`-` zoom, and `Home` restores the Iso view. Camera presets and layer controls follow in the tab order.
 - North, East, South, and West buttons set cardinal camera headings. Save/Restore stores one camera view under `vcss-3d-camera` on this device; the viewport can enter browser full screen and export a PNG with version, simulation mode, and UTC timestamp metadata.
 
@@ -160,17 +166,20 @@ The interface uses a small CSS-only motion system, with no animation libraries o
 
 ## Performance
 
-The figures below combine the v1.1.1 baseline with fresh v1.2.0, v1.3.0, v1.4.0 and v1.5.0 re-measurements; see [PERFORMANCE.md](PERFORMANCE.md) for the full record. v1.5.0 raises raw ceilings to **280,000 B** (`app.js`), **175,000 B** (`styles.css`), **75,000 B** (`index.html`), and **530,000 B** total runtime for the content-depth release, plus the first compressed-transfer raise: **Brotli 102,400 → 106,000 B** (prose content compresses well but pushed the measured total past the old ceiling; gzip stays 130,000 B). All raises are documented in `budgets.json`.
+The figures below combine the v1.1.1 baseline with fresh v1.2.0 through v1.8.0 re-measurements; see [PERFORMANCE.md](PERFORMANCE.md) for the full record. v1.5.0 raised raw ceilings to **280,000 B** (`app.js`), **175,000 B** (`styles.css`), **75,000 B** (`index.html`), and **530,000 B** total runtime for the content-depth release, plus the first compressed-transfer raise: **Brotli 102,400 → 106,000 B**. v1.5.1 needed no raise. v1.6.0 raised them with documentation for the arrival gate and fluid shell: **index.html 78,000 B**, **styles.css 186,000 B**, **app.js 286,000 B**, **total 556,000 B**, **Brotli 112,000 B**. v1.7.0's raise was the **interaction-probe budget**: the new perf lab retired the two budgets open since v1.1.1. v1.8.0 fits inside all ceilings (542,310 B raw).
 
-v1.5.0 passed every enforced gate:
+v1.8.0 passed every enforced gate:
 
-- **521,273 B** raw runtime assets, **116,197 B** gzip, **103,199 B** Brotli (budgets: 530,000 / 130,000 / 106,000).
-- **1,924** initial DOM nodes; hidden data views are not rendered at startup, and the command palette is created only when opened.
-- **33/33** light and dark functional suites, **27/27** Phase 2 acceptance suite, **29/29** Guidance suite (updated to the new content reality: 11 map rows, 22 glossary terms), **34/34** palette suite, clean browser audit across the 320–2560 px width matrix, **0** controls under 24 px; zero console errors and zero external requests.
-- **60.3 fps** in the 3D view (≥ 55 gate; identical to the v1.4.0 release run — the content-depth phase adds no renderer work).
-- Lighthouse accessibility **1.0** and CLS **0.000** on Overview, NOC, and Guidance; FCP and LCP pass; TBT passes on Overview (**99 ms**) and Guidance (**170 ms**), while NOC (**250 ms**) remains inside the documented v1.2 TBT exception — a same-day v1.3.0 control build measured NOC TBT **229 ms** with less NOC content, confirming the overage predates v1.5.0 and the spread is machine-state.
+- **542,310 B** raw runtime assets, **122,244 B** gzip, **108,376 B** Brotli (budgets: 556,000 / 130,000 / 112,000).
+- **39/39** light and dark functional suites, **27/27** Phase 2 acceptance suite, **29/29** Guidance suite, **34/34** palette suite, clean browser audit across the width matrix, **0** controls under 24 px including the gate itself; zero console errors and zero external requests.
+- **60.2 fps** in the 3D view (≥ 55 gate).
+- **Full-bleed verified at 1440 / 2560 / 3440 px**: shell, top bar, and command bar all measure exactly the viewport width with zero horizontal overflow; verified frozen under reduced motion with instant entry.
+- **Perf lab: warm tab-switch p75 280 ms ≤ 400 ms and Guidance first activation 256 ms ≤ 750 ms, zero failures** — with a same-machine A/B against the v1.7.0 build showing no regression from the full-bleed change (v1.8.0 posted the best-ever 240 ms run; day-to-day lab spread on a busy machine is documented in `budgets.json`).
+- Lighthouse accessibility **1.0** and CLS **0.000** on Overview, NOC, and Guidance; FCP and LCP pass; **TBT passes on all three audited tabs — Overview 94 ms, NOC 172 ms, Guidance 154 ms**. The NOC exception's documented variance range (171–492 ms) stays on the books as the machine-state envelope.
 
-Still open from v1.1.1 (documented exception, deferred to the runtime-split work): warm tab-switch p75 **408 ms** headed (395–568 ms headless) vs ≤200 ms at 4× CPU and Guidance first activation **1,096.9 ms** vs ≤750 ms — both await a repeatable lab script. TBT passed on Overview and Guidance in the v1.5.0 release run; NOC TBT stays inside the documented exception until the runtime-split work lands (Phase 4 in [FULL-UPGRADE-PLAN.md](FULL-UPGRADE-PLAN.md)). The full measurements are in [PERFORMANCE.md](PERFORMANCE.md).
+The only remaining Phase 4 lever is **table virtualization** for the NOC/UE registry (open as future work); URL-encoded session sharing and role presets remain planned. The full measurements, the experiment ledger, and the engine-cost decomposition are in [PERFORMANCE.md](PERFORMANCE.md).
+
+v1.7.0 passed every enforced gate:
 
 ## Suggested demo flow
 
@@ -191,6 +200,8 @@ Still open from v1.1.1 (documented exception, deferred to the runtime-split work
 
 **Tip:** press **Ctrl K** at any point to jump to a workspace, run an action, or search a UE, alarm, or procedure. Press **?** for the shortcut sheet.
 
+On a hashless first open the animated arrival gate appears before the flow — enter with **Let's Simulate Telco Network**, the skip link, or **Escape**.
+
 ## Project structure
 
 ```text
@@ -203,7 +214,7 @@ vcss-4g/
 ├── favicon.svg         # Tower mark used by the browser tab
 ├── budgets.json        # Release size, performance and target-size gates
 ├── README.md           # Feature guide and demo walkthrough
-├── PERFORMANCE.md      # Performance record (v1.1.1 → v1.5.0) and release exception
+├── PERFORMANCE.md      # Performance record (v1.1.1 → v1.8.0) and release exception
 ├── UX-ENHANCEMENTS.md  # Post-v1.1 UI/UX and 3D enhancement research
 ├── FULL-UPGRADE-PLAN.md # Consolidated functions/content/UI upgrade plan
 ├── tests/              # Dev-only budget, browser, resilience and Lighthouse audits

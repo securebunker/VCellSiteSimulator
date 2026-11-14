@@ -1,21 +1,21 @@
-﻿/* ==========================================================================
-   VCSS 4G â€” Virtual Cell Site Simulator
+/* ==========================================================================
+   VCSS 4G — Virtual Cell Site Simulator
    Synthetic LTE lab UI. No radio hardware or live network integration.
    ========================================================================== */
 
 :root {
   color-scheme: dark;
-  --bg: #060e16;
-  --bg-2: #07121d;
-  --surface: #0b1723;
-  --surface-2: #0e1d2c;
-  --surface-3: #09131e;
-  --surface-4: #122333;
-  --line: rgba(151, 180, 207, .14);
-  --line-strong: rgba(151, 180, 207, .26);
-  --text: #e9f2fb;
-  --muted: #8da4ba;
-  --muted-2: #647c92;
+  --bg: #050c15;
+  --bg-2: #061121;
+  --surface: #0a1826;
+  --surface-2: #0d1f30;
+  --surface-3: #081320;
+  --surface-4: #12293d;
+  --line: rgba(146, 196, 224, .16);
+  --line-strong: rgba(146, 196, 224, .3);
+  --text: #eaf3fc;
+  --muted: #93b1cb;
+  --muted-2: #6a839b;
   --teal: #5eead4;
   --teal-2: #2dd4bf;
   --cyan: #38bdf8;
@@ -32,6 +32,9 @@
   --sans: "Segoe UI Variable", "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
   --shadow: 0 24px 70px -38px rgba(0, 0, 0, .95);
   --header-h: 70px;
+  /* v1.8.0: shared edge gutter for bars + main. */
+  --gutter: clamp(16px, 1.8vw, 34px);
+  --gutter-x: max(var(--gutter), env(safe-area-inset-left), env(safe-area-inset-right));
   --scene-sky-top: rgba(5, 13, 21, .45);
   --scene-sky-mid: rgba(6, 19, 30, .2);
   --scene-sky-bottom: rgba(3, 10, 16, .8);
@@ -66,9 +69,10 @@ body {
   min-width: 320px;
   color: var(--text);
   background:
-    radial-gradient(1100px 650px at 8% -12%, rgba(45, 212, 191, .13), transparent 62%),
-    radial-gradient(900px 600px at 98% -5%, rgba(251, 113, 133, .07), transparent 58%),
-    radial-gradient(900px 700px at 55% 110%, rgba(56, 189, 248, .06), transparent 62%),
+    radial-gradient(1200px 700px at 9% -14%, rgba(45, 212, 191, .16), transparent 64%),
+    radial-gradient(1000px 640px at 97% -6%, rgba(129, 140, 248, .1), transparent 60%),
+    radial-gradient(900px 600px at 99% 4%, rgba(251, 113, 133, .06), transparent 58%),
+    radial-gradient(1000px 750px at 55% 112%, rgba(56, 189, 248, .07), transparent 62%),
     var(--bg);
   font-family: var(--sans);
   font-size: 14px;
@@ -166,17 +170,18 @@ html.theme-transition *::after {
   transition-timing-function: ease !important;
 }
 
+/* v1.8.0 full-bleed shell: the shell and both sticky bars span the viewport at every
+   resolution — no max-width clamp. Bars carry gutter padding inside. */
 .app-shell {
-  width: min(1560px, calc(100% - 40px));
+  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-  margin-inline: auto;
-  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   display: flex;
   flex-direction: column;
 }
-@media (min-width: 1600px) {
-  .app-shell { width: min(1720px, calc(100% - 40px)); }
+@media (min-width: 1920px) {
+  .main { padding-top: 30px; }
+  .kpi-grid, .rogue-kpis, .noc-kpis { gap: 14px; }
 }
 
 /* ==========================================================================
@@ -192,6 +197,7 @@ html.theme-transition *::after {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  padding-inline: var(--gutter-x);
   border-bottom: 1px solid var(--line);
   background: rgba(6, 14, 22, .82);
   backdrop-filter: blur(20px) saturate(135%);
@@ -245,7 +251,7 @@ html.theme-transition *::after {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 9px 0;
+  padding: 9px var(--gutter-x);
   border-bottom: 1px solid var(--line);
   background: rgba(6, 14, 22, .78);
   backdrop-filter: blur(18px) saturate(130%);
@@ -376,7 +382,7 @@ html.theme-transition *::after {
 .link-btn .icon { width: 12px; height: 12px; transition: transform .15s; }
 .link-btn:hover .icon { transform: translateX(2px); }
 
-.main { flex: 1; padding: 25px 0 54px; }
+.main { flex: 1; padding: 25px var(--gutter-x) 54px; }
 .view { animation: viewIn .34s cubic-bezier(.22, .8, .3, 1) both; }
 @keyframes viewIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
 .page-head {
@@ -409,7 +415,7 @@ html.theme-transition *::after {
   position: relative;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(15, 30, 45, .86), rgba(8, 19, 30, .94));
+  background: linear-gradient(180deg, rgba(13, 31, 48, .88), rgba(6, 16, 27, .95));
   box-shadow: var(--shadow);
   padding: 16px;
   overflow: hidden;
@@ -1878,7 +1884,7 @@ html[data-theme="light"] .shortcut-row kbd {
 .app-footer > div { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .footer-brand { color: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: .8px; }
 .footer-meta { font-family: var(--mono); font-size: 9px; letter-spacing: .3px; }
-.footer-meta span + span::before { content: "Â·"; margin-right: 10px; color: var(--line-strong); }
+.footer-meta span + span::before { content: "·"; margin-right: 10px; color: var(--line-strong); }
 
 /* ==========================================================================
    3D emulation
@@ -1968,9 +1974,9 @@ body::after {
   pointer-events: none;
   opacity: .9;
   background:
-    radial-gradient(38% 34% at 20% 22%, rgba(45, 212, 191, .1), transparent 66%),
-    radial-gradient(34% 30% at 80% 16%, rgba(56, 189, 248, .075), transparent 66%),
-    radial-gradient(30% 32% at 62% 84%, rgba(167, 139, 250, .055), transparent 70%);
+    radial-gradient(38% 34% at 20% 22%, rgba(45, 212, 191, .13), transparent 66%),
+    radial-gradient(34% 30% at 80% 16%, rgba(129, 140, 248, .08), transparent 66%),
+    radial-gradient(30% 32% at 62% 84%, rgba(167, 139, 250, .075), transparent 70%);
   will-change: transform;
   animation: ambientDrift 28s ease-in-out infinite alternate;
 }
@@ -2479,8 +2485,8 @@ html { scrollbar-color: #243a4e #07131e; scrollbar-width: thin; }
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg: #eef3f8;
-  --bg-2: #e6eef7;
+  --bg: #ecf2fa;
+  --bg-2: #e2ecf8;
   --surface: #ffffff;
   --surface-2: #f5f9fd;
   --surface-3: #f8fbfe;
@@ -2529,9 +2535,10 @@ html[data-theme="light"] {
 
 html[data-theme="light"] body {
   background:
-    radial-gradient(1100px 650px at 8% -12%, rgba(13, 148, 136, .11), transparent 62%),
-    radial-gradient(900px 600px at 98% -5%, rgba(190, 18, 60, .05), transparent 58%),
-    radial-gradient(900px 700px at 55% 110%, rgba(3, 105, 161, .06), transparent 62%),
+    radial-gradient(1200px 700px at 9% -14%, rgba(13, 148, 136, .13), transparent 64%),
+    radial-gradient(1000px 640px at 96% -6%, rgba(79, 70, 229, .065), transparent 60%),
+    radial-gradient(900px 600px at 99% 2%, rgba(190, 18, 60, .045), transparent 58%),
+    radial-gradient(1000px 750px at 55% 112%, rgba(3, 105, 161, .07), transparent 62%),
     var(--bg);
 }
 html[data-theme="light"] body::before {
@@ -2543,9 +2550,9 @@ html[data-theme="light"] body::before {
 html[data-theme="light"] body::after {
   opacity: .65;
   background:
-    radial-gradient(38% 34% at 20% 22%, rgba(13, 148, 136, .09), transparent 66%),
-    radial-gradient(34% 30% at 80% 16%, rgba(3, 105, 161, .06), transparent 66%),
-    radial-gradient(30% 32% at 62% 84%, rgba(109, 40, 217, .05), transparent 70%);
+    radial-gradient(38% 34% at 20% 22%, rgba(13, 148, 136, .11), transparent 66%),
+    radial-gradient(34% 30% at 80% 16%, rgba(79, 70, 229, .06), transparent 66%),
+    radial-gradient(30% 32% at 62% 84%, rgba(109, 40, 217, .055), transparent 70%);
 }
 html[data-theme="light"] ::selection { background: rgba(15, 118, 110, .2); color: #062a24; }
 
@@ -3012,6 +3019,135 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #93aec5; 
 }
 
 /* ==========================================================================
+   Landing gate (v1.6.0) — hashless loads only. Dark stage regardless of app
+   theme; CTA enters the workspace, Escape / skip button do the same.
+   ========================================================================== */
+
+.landing-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: #04090f;
+  color: #e8f6ff;
+  text-align: center;
+  animation: gateIn .6s cubic-bezier(.22, .8, .3, 1) both;
+}
+.landing-gate[hidden] { display: none; }
+@keyframes gateIn { from { opacity: 0; } }
+.gate-sky, .gate-sky i { position: absolute; inset: 0; pointer-events: none; }
+.ga { border-radius: 50%; filter: blur(90px); opacity: .55; }
+.ga1 { width: 62vmax; height: 62vmax; left: -18vmax; top: -24vmax; background: radial-gradient(circle, rgba(45, 212, 191, .5), transparent 65%); animation: gateDrift 26s ease-in-out infinite alternate; }
+.ga2 { width: 55vmax; height: 55vmax; right: -20vmax; top: -12vmax; background: radial-gradient(circle, rgba(56, 189, 248, .4), transparent 65%); animation: gateDrift 32s ease-in-out infinite alternate-reverse; }
+.ga3 { width: 48vmax; height: 48vmax; left: 28%; bottom: -26vmax; background: radial-gradient(circle, rgba(129, 140, 248, .32), transparent 65%); animation: gateDrift 38s ease-in-out infinite alternate; }
+@keyframes gateDrift { to { transform: translate3d(6vmax, 4vmax, 0) scale(1.12); } }
+.gate-gridlines { opacity: .5; background-image: linear-gradient(rgba(148, 196, 220, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 196, 220, .05) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(70% 62% at 50% 44%, #000, transparent 78%); }
+.gate-sweep { left: 50%; top: 44%; width: 150vmax; height: 150vmax; translate: -50% -50%; background: conic-gradient(from 0deg, rgba(45, 212, 191, .12), transparent 18%, transparent 82%, rgba(45, 212, 191, .12)); border-radius: 50%; mask-image: radial-gradient(circle, #000 26%, transparent 66%); animation: gateSpin 22s linear infinite; }
+@keyframes gateSpin { to { rotate: 1turn; } }
+/* v1.7.0 gate motion pack: drifting particles, radar scan wedge, title pan,
+   stage breathing, soft entry flash — transform/opacity only, all frozen by
+   the global prefers-reduced-motion block and hidden in that state. */
+.gp { position: absolute; bottom: -5vh; width: 4px; height: 4px; border-radius: 50%; background: rgba(125, 244, 220, .85); box-shadow: 0 0 9px rgba(45, 212, 191, .75); opacity: 0; animation: gateFloat 11s linear infinite; }
+.gp.g1 { left: 11%; animation-duration: 12s; }
+.gp.g2 { left: 24%; animation-delay: 2.2s; animation-duration: 10s; background: rgba(147, 197, 253, .8); box-shadow: 0 0 9px rgba(56, 189, 248, .7); }
+.gp.g3 { left: 47%; animation-delay: 4.6s; animation-duration: 13s; }
+.gp.g4 { left: 68%; animation-delay: 1.4s; animation-duration: 11s; background: rgba(196, 181, 253, .8); box-shadow: 0 0 9px rgba(167, 139, 250, .7); }
+.gp.g5 { left: 82%; animation-delay: 6.2s; animation-duration: 12s; }
+.gp.g6 { left: 93%; animation-delay: 3.4s; animation-duration: 10s; background: rgba(147, 197, 253, .8); box-shadow: 0 0 9px rgba(56, 189, 248, .7); }
+@keyframes gateFloat { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 9% { opacity: .65; } 82% { opacity: .22; } 100% { transform: translate3d(2.4vw, -106vh, 0); opacity: 0; } }
+/* v1.8.0 gate movement: orbiting satellites, sky streaks, cursor parallax (--gx/--gy via app.js; frozen by reduced motion). */
+.go { position: absolute; inset: -16%; animation: gateOrbit 13s linear infinite; pointer-events: none; }
+.go::before { content: ""; position: absolute; top: 5%; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%; background: #9ff5e6; box-shadow: 0 0 12px rgba(94, 234, 212, .95); }
+.go.o2 { inset: -34%; animation-duration: 22s; animation-direction: reverse; }
+.go.o2::before { width: 5px; height: 5px; margin-left: -2.5px; background: #a5b4fc; box-shadow: 0 0 12px rgba(129, 140, 248, .95); }
+.go.o3 { inset: -25%; animation-duration: 17.5s; }
+.go.o3::before { width: 4px; height: 4px; margin-left: -2px; top: 9%; background: #bae6fd; box-shadow: 0 0 10px rgba(56, 189, 248, .9); }
+@keyframes gateOrbit { to { rotate: 1turn; } }
+.gstr { position: absolute; width: 210px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, rgba(151, 226, 244, .8), transparent); opacity: 0; transform: rotate(-13deg); animation: gateStreak 14s linear infinite; }
+.gstr.s1 { top: 15%; left: -12%; animation-delay: 2.6s; }
+.gstr.s2 { top: 40%; left: -16%; width: 270px; animation-duration: 18s; animation-delay: 8.4s; }
+.gstr.s3 { top: 66%; left: -10%; animation-duration: 16s; animation-delay: 12.8s; }
+@keyframes gateStreak { 0% { translate: 0 0; opacity: 0; } 3% { opacity: .85; } 13% { translate: 130vw 30vw; opacity: 0; } 100% { translate: 130vw 30vw; opacity: 0; } }
+.gate-core, .gate-stage { transition: translate .45s ease-out; }
+.gate-core { translate: calc(var(--gx, 0) * 7px) calc(var(--gy, 0) * 5px); }
+.gate-stage { translate: calc(var(--gx, 0) * 14px) calc(var(--gy, 0) * 10px); }
+.gate-sky .ga { translate: calc(var(--gx, 0) * -22px) calc(var(--gy, 0) * -14px); transition: translate .45s ease-out; }
+.gate-core { position: relative; max-width: 780px; display: grid; justify-items: center; gap: 4px; }
+.gate-core > * { animation: gateRise .7s cubic-bezier(.22, .8, .3, 1) backwards; }
+.gate-stage { animation-delay: .05s; }
+.gate-kicker { animation-delay: .16s; }
+.gate-title { animation-delay: .24s; }
+.gate-desc { animation-delay: .32s; }
+.gate-cta { animation-delay: .42s; }
+.gate-skip { animation-delay: .52s; }
+.gate-note { animation-delay: .6s; }
+@keyframes gateRise { from { opacity: 0; transform: translateY(18px); } }
+.gate-stage { animation: gateRise .7s cubic-bezier(.22, .8, .3, 1) .05s backwards, gateStageBreath 6.5s ease-in-out 1.6s infinite alternate; position: relative; width: 190px; height: 190px; margin-bottom: 10px; display: grid; place-items: center; }
+.gate-stage::before { content: ""; position: absolute; inset: -20%; border-radius: 50%; background: conic-gradient(from 40deg, rgba(94, 234, 212, .18), transparent 24%, transparent 100%); -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 72%); mask-image: radial-gradient(circle, #000 30%, transparent 72%); animation: gateSpin 9s linear infinite; pointer-events: none; }
+@keyframes gateStageBreath { to { transform: scale(1.045); } }
+.gate-ring { position: absolute; inset: 0; margin: auto; width: 62px; height: 62px; border-radius: 50%; border: 1px solid rgba(94, 234, 212, .5); opacity: 0; animation: gatePing 3.4s cubic-bezier(.2, .6, .3, 1) infinite; }
+.gr2 { animation-delay: 1.13s; }
+.gr3 { animation-delay: 2.26s; }
+@keyframes gatePing { 0% { transform: scale(.4); opacity: 0; } 12% { opacity: .8; } 100% { transform: scale(3.1); opacity: 0; } }
+.gate-tower { width: 76px; height: 76px; color: #5eead4; filter: drop-shadow(0 0 22px rgba(45, 212, 191, .55)); }
+.gate-chip { position: absolute; display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600; letter-spacing: .02em; color: #d9f7f1; background: rgba(10, 24, 34, .62); border: 1px solid rgba(94, 234, 212, .28); box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .6); backdrop-filter: blur(10px); animation: gateRise .7s cubic-bezier(.22, .8, .3, 1) backwards, gateBob 5.2s ease-in-out 1.2s infinite; }
+.gc1 { top: 4px; left: -86px; }
+.gc2 { bottom: 8px; left: -104px; animation-delay: .5s, 1.9s; }
+.gc3 { top: 34px; right: -96px; animation-delay: .58s, 2.6s; color: #ffd3dd; border-color: rgba(251, 113, 133, .36); }
+.gate-chip .icon { width: 13px; height: 13px; color: #5eead4; }
+.gc3 .icon { color: #fb7185; }
+@keyframes gateBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.gate-kicker { font-size: 11px; font-weight: 700; letter-spacing: .34em; text-transform: uppercase; color: rgba(148, 233, 215, .75); }
+.gate-title { margin: 6px 0 2px; font-size: clamp(30px, 4.6vw, 58px); line-height: 1.04; letter-spacing: -.035em; font-weight: 750; background: linear-gradient(100deg, #eafffb 12%, #7ff0dc 46%, #8ab4ff 88%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gateRise .7s cubic-bezier(.22, .8, .3, 1) backwards, gateTitlePan 8s ease-in-out .9s infinite alternate; }
+@keyframes gateTitlePan { from { background-position: 0% 0; } to { background-position: 100% 0; } }
+.gate-desc { max-width: 620px; font-size: 13.5px; line-height: 1.7; color: rgba(196, 222, 238, .78); }
+.gate-cta { position: relative; margin-top: 22px; display: inline-flex; align-items: center; gap: 12px; padding: 17px 34px; border: 0; border-radius: 999px; cursor: pointer; font: 700 16px/1 var(--sans); letter-spacing: .01em; color: #04211c; background: linear-gradient(135deg, #34e0c4, #14b8a6 55%, #0ea5e9); box-shadow: 0 18px 44px -14px rgba(20, 184, 166, .65), inset 0 1px 0 rgba(255, 255, 255, .35); overflow: hidden; transition: transform .18s ease, box-shadow .25s ease; }
+.gate-cta::before { content: ""; position: absolute; inset: -40px; background: conic-gradient(from 120deg, transparent 70%, rgba(255, 255, 255, .5), transparent 86%); animation: gateSheen 3.6s ease-in-out infinite; }
+.gate-cta::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; border: 1px solid rgba(94, 234, 212, .55); opacity: 0; animation: gatePulse 2.6s ease-out infinite; }
+@keyframes gateSheen { 0%, 55% { transform: translateX(-60%) rotate(.2turn); } 100% { transform: translateX(60%) rotate(.2turn); } }
+@keyframes gatePulse { 0% { transform: scale(1); opacity: .7; } 70%, 100% { transform: scale(1.14); opacity: 0; } }
+.gate-cta .icon { width: 17px; height: 17px; position: relative; }
+.gate-cta > span { position: relative; }
+.gate-cta:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 24px 54px -16px rgba(20, 184, 166, .8), inset 0 1px 0 rgba(255, 255, 255, .4); }
+.gate-cta:active { transform: translateY(0) scale(.985); }
+.gate-skip { margin-top: 14px; padding: 10px 18px; border: 0; background: none; cursor: pointer; font: 600 12.5px/1.2 var(--sans); color: rgba(163, 207, 224, .72); text-decoration: underline; text-underline-offset: 4px; transition: color .2s; }
+.gate-skip:hover { color: #7ff0dc; }
+.gate-note { margin-top: 12px; font-size: 10.5px; letter-spacing: .08em; color: rgba(148, 178, 196, .5); }
+.landing-gate.gate-leaving { animation: gateOut .58s cubic-bezier(.3, .6, .2, 1) forwards; pointer-events: none; }
+.landing-gate.gate-leaving::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(58% 58% at 50% 44%, rgba(126, 245, 220, .16), transparent 72%); animation: gateFlash .58s ease-out forwards; }
+@keyframes gateFlash { 0% { opacity: 0; } 38% { opacity: 1; } 100% { opacity: 0; } }
+.landing-gate.gate-leaving .gate-core { animation: gateCoreOut .5s cubic-bezier(.5, 0, .8, .4) forwards; }
+.landing-gate.gate-leaving .gate-ring { animation: gateBurst .5s cubic-bezier(.2, .7, .3, 1) forwards; opacity: .9; }
+@keyframes gateOut { to { opacity: 0; } }
+@keyframes gateCoreOut { 40% { transform: scale(1.05); opacity: 1; } to { transform: scale(1.22); opacity: 0; } }
+@keyframes gateBurst { to { transform: scale(4.4); opacity: 0; } }
+body.app-entered .app-shell { animation: gateSettle .6s cubic-bezier(.22, .8, .3, 1); }
+@keyframes gateSettle { from { opacity: .35; transform: scale(.988); } }
+@media (max-width: 760px) {
+  .gate-chip { display: none; }
+  .gate-stage { width: 160px; height: 160px; }
+}
+
+/* v1.7.0 Phase 4: bound each card's layout/paint scope so a warm tab switch
+   only lays out and paints the newly active view's own subtrees instead of
+   invalidating across the whole page. */
+.card, .kpi, .mini-kpi {
+  contain: layout paint;
+}
+
+/* v1.6.0 pointer-fine polish: cards lift subtly under the cursor and glow on focus. */
+@media (hover: hover) and (pointer: fine) {
+  .card { transition: border-color .22s ease, box-shadow .28s ease, transform .22s ease; }
+  .card:hover { transform: translateY(-1px); border-color: rgba(94, 234, 212, .3); box-shadow: 0 16px 40px -22px rgba(0, 0, 0, .6); }
+}
+html[data-theme="light"] .card:hover { border-color: rgba(13, 148, 136, .35); box-shadow: 0 16px 36px -24px rgba(15, 23, 42, .22); }
+.card:focus-within { border-color: rgba(94, 234, 212, .34); }
+html[data-theme="light"] .card:focus-within { border-color: rgba(13, 148, 136, .4); }
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
@@ -3032,7 +3168,6 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #93aec5; 
   #view-noc .noc-detail-meta { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 1040px) {
-  .app-shell { width: min(100% - 28px, 1560px); }
   .top-status .status-pill:nth-child(2) { display: none; }
   .command-meta { display: none; }
   .tabs { flex-wrap: nowrap; overflow-x: auto; min-width: 0; padding-bottom: 3px; scrollbar-width: thin; scrollbar-color: rgba(94, 234, 212, .32) transparent; }
@@ -3057,7 +3192,6 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #93aec5; 
 @media (max-width: 760px) {
   :root { --header-h: 62px; }
   body { font-size: 13.5px; }
-  .app-shell { width: calc(100% - 22px); }
   .topbar { gap: 10px; }
   .brand-copy small { display: none; }
   .top-status .status-pill.mono { display: none; }
@@ -3170,6 +3304,11 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #93aec5; 
   .scene-stage::after,
   .tower-ring,
   .radar-sweep,
+  .gate-sweep,
+  .gate-stage::before,
+  .gate-cta::before,
+  .gate-cta::after,
+  .gp, .go, .gstr,
   .toast::before {
     display: none !important;
   }
@@ -3180,7 +3319,7 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #93aec5; 
 
 @media print {
   body { background: #fff; color: #111; }
-  body::before, body::after, .scroll-progress, .topbar, .commandbar, .page-actions, .app-footer, .toast-wrap, .modal-backdrop, .drawer-backdrop, .scene-stage { display: none !important; }
+  body::before, body::after, .scroll-progress, .topbar, .commandbar, .page-actions, .app-footer, .toast-wrap, .modal-backdrop, .drawer-backdrop, .scene-stage, .landing-gate { display: none !important; }
   .app-shell { width: 100%; }
   .main { padding: 0; }
   .view { display: none !important; }
@@ -3196,7 +3335,7 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #93aec5; 
 }
 
 /* ==========================================================================
-   v1.1 Foundation â€” target sizes, System theme, contrast and resilience
+   v1.1 Foundation — target sizes, System theme, contrast and resilience
    ========================================================================== */
 
 /* Pointer targets: hit areas grow without changing the visible track/thumb. */

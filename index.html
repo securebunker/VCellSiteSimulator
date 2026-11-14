@@ -5,18 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="VCSS 4G — a synthetic virtual cell site simulator with virtual UEs, LTE signaling traces, a deployable fake BTS scenario and an MNO business-case model.">
 <meta name="theme-color" content="#060e16">
-<meta name="app-version" content="1.5.0">
+<meta name="app-version" content="1.8.0">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>VCSS 4G — Virtual Cell Site Simulator</title>
-<script src="theme-init.js?v=1.5.0"></script>
-<link rel="icon" href="favicon.svg?v=1.5.0" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=1.5.0">
+<script src="theme-init.js?v=1.8.0"></script>
+<link rel="icon" href="favicon.svg?v=1.8.0" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css?v=1.8.0">
 </head>
 <body>
 
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="scroll-progress" aria-hidden="true"><i id="scrollProgressBar"></i></div>
+
+<!-- v1.6.0 landing gate: shown on hashless loads only; deep links enter the app directly. -->
+<div class="landing-gate" id="landingGate" role="dialog" aria-modal="true" aria-labelledby="gateTitle" aria-describedby="gateDesc" hidden>
+  <div class="gate-sky" aria-hidden="true"><i class="ga ga1"></i><i class="ga ga2"></i><i class="ga ga3"></i><i class="gate-gridlines"></i><i class="gate-sweep"></i><i class="gp g1"></i><i class="gp g2"></i><i class="gp g3"></i><i class="gp g4"></i><i class="gp g5"></i><i class="gp g6"></i><i class="gstr s1"></i><i class="gstr s2"></i><i class="gstr s3"></i></div>
+  <div class="gate-core">
+    <div class="gate-stage" aria-hidden="true">
+      <i class="gate-ring gr1"></i><i class="gate-ring gr2"></i><i class="gate-ring gr3"></i><i class="go o1"></i><i class="go o2"></i><i class="go o3"></i>
+      <svg class="gate-tower"><use href="#i-tower"></use></svg>
+      <span class="gate-chip gc1"><svg class="icon"><use href="#i-signal"></use></svg>eNB 0417 · PCI 127</span>
+      <span class="gate-chip gc2"><svg class="icon"><use href="#i-users"></use></svg>12 UEs attached</span>
+      <span class="gate-chip gc3"><svg class="icon"><use href="#i-alert"></use></svg>IMSI catcher armed</span>
+    </div>
+    <p class="gate-kicker">Virtual Cell Site Simulator · 4G/LTE</p>
+    <h1 class="gate-title" id="gateTitle">See the fake-BTS attack before it costs you.</h1>
+    <p class="gate-desc" id="gateDesc">A synthetic operator range for defensive rogue-cell validation: NOC/SOC response, a live 3D RAN, LTE signaling traces, subscriber impact and the business case — all local, nothing transmits.</p>
+    <button class="gate-cta" id="gateEnter" type="button"><span>Let's Simulate Telco Network</span><svg class="icon" aria-hidden="true"><use href="#i-play"></use></svg></button>
+    <button class="gate-skip" id="gateSkip" type="button">Skip the intro — open the workspace</button>
+    <p class="gate-note">Simulation only · no RF, no live EPC, no real subscriber data</p>
+  </div>
+</div>
 
 <svg class="icon-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
   <symbol id="i-tower" viewBox="0 0 24 24"><path d="M7 21h10M12 21V9M8.5 12.5a5 5 0 0 1 0-7M15.5 5.5a5 5 0 0 1 0 7M6 15a8.5 8.5 0 0 1 0-12M18 3a8.5 8.5 0 0 1 0 12"/><circle cx="12" cy="9" r="1.4"/></symbol>
@@ -905,6 +925,6 @@
 <div id="modalRoot"></div>
 <div id="drawerRoot"></div>
 <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
-<script src="app.js?v=1.5.0"></script>
+<script src="app.js?v=1.8.0"></script>
 </body>
 </html>

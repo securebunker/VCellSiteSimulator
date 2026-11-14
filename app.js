@@ -62,7 +62,7 @@
   };
 
   const TAB_NAMES = ['overview', 'noc', 'ues', 'signaling', '3d', 'rogue', 'business', 'guidance'];
-  const APP_VERSION = '1.5.0';
+  const APP_VERSION = '1.8.0';
   const viewDirty = new Set(TAB_NAMES);
   let lastLiveAnnounceAt = 0;
   let liveAnnounceTimer = 0;
@@ -3080,6 +3080,48 @@
     }
   }
 
+  /* ---- v1.6.0 landing gate: hashless loads get the animated arrival screen;
+     deep links (any #tab) and post-entry reloads skip straight to the app. ---- */
+  function gateEl() { return $('#landingGate'); }
+  function gateOpen() { const gate = gateEl(); return !!gate && !gate.hidden; }
+  function setGateInert(on) {
+    [$('.app-shell'), $('.skip-link')].forEach((el) => {
+      if (!el) return;
+      if (on) el.setAttribute('inert', '');
+      else el.removeAttribute('inert');
+    });
+  }
+  function initGate(hadHash) {
+    const gate = gateEl();
+    if (!gate || hadHash) return;
+    gate.hidden = false;
+    setGateInert(true);
+    /* v1.8.0 gate parallax: cursor drives --gx/--gy (-1..1) for the CSS side
+       (core/stage forward, aurora blobs counter). Skipped under reduced motion. */
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gate.addEventListener('pointermove', (e) => {
+        const r = gate.getBoundingClientRect();
+        gate.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 2 - 1).toFixed(3));
+        gate.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 2 - 1).toFixed(3));
+      }, { passive: true });
+    }
+    setTimeout(() => $('#gateEnter')?.focus(), 90);
+  }
+  function enterApp(options = {}) {
+    const gate = gateEl();
+    if (!gate || gate.hidden) return;
+    const finish = () => {
+      gate.hidden = true;
+      gate.classList.remove('gate-leaving');
+      setGateInert(false);
+      document.body.classList.add('app-entered');
+      if (options.focus !== false) $('#main')?.focus({ preventScroll: true });
+    };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
+    gate.classList.add('gate-leaving');
+    setTimeout(finish, 600);
+  }
+
   function restoreFocusTo(target, fallbackSelector) {
     setTimeout(() => {
       if (target && document.contains(target) && target.getClientRects().length) {
@@ -3465,6 +3507,7 @@
     hover: null,
     selected: null,
     savedCamera: null,
+    everActivated: false,
     hits: [],
     labels: [],
     palette: null,
@@ -3698,8 +3741,8 @@
     return points;
   }
 
-  function drawGroundCircle(ctx, cam, cx, cz, radius, color, width = 1, dash = null) {
-    scenePolyline(ctx, sceneCircle(cx, cz, radius), cam, color, width, dash, true);
+  function drawGroundCircle(ctx, cam, cx, cz, radius, color, width = 1, dash = null, dashOffset = 0) {
+    scenePolyline(ctx, sceneCircle(cx, cz, radius), cam, color, width, dash, true, dashOffset);
   }
 
   function sceneRoundRect(ctx, x, y, w, h, r) {
@@ -3892,10 +3935,11 @@
       const color = t.type === 'rogue' ? palette.rogue : t.type === 'macro' ? palette.macro : palette.neighbor;
       const half = t.type === 'macro' ? 0.55 : 0.5;
       const baseAlpha = t.type === 'rogue' ? 0.075 : t.type === 'macro' ? 0.045 : 0.032;
+      const shimmer = 0.85 + 0.15 * (0.5 + 0.5 * Math.sin(now / 1100 + t.x * 0.05 + t.z * 0.031));
       t.sectors.forEach((deg) => {
         const angle = (deg * Math.PI) / 180;
-        scenePolygon(ctx, sceneSector(t.x, t.z, t.radius, angle, half, 20), cam, sceneRgba(color, baseAlpha), sceneRgba(color, .12), 1);
-        scenePolygon(ctx, sceneSector(t.x, t.z, t.radius * 0.6, angle, half * 0.8, 16), cam, sceneRgba(color, baseAlpha * 1.7), null);
+        scenePolygon(ctx, sceneSector(t.x, t.z, t.radius, angle, half, 20), cam, sceneRgba(color, baseAlpha * shimmer), sceneRgba(color, .12), 1);
+        scenePolygon(ctx, sceneSector(t.x, t.z, t.radius * 0.6, angle, half * 0.8, 16), cam, sceneRgba(color, baseAlpha * 1.7 * shimmer), null);
       });
       if (t.type === 'macro') {
         const sweep = (now * 0.00032) % TAU;
@@ -3911,6 +3955,19 @@
       }
     });
     if (state.rogue && !state.incident?.contained) {
+      scenePolyline(
+        ctx,
+        [
+          { x: SCENE3D.macro.x, y: SCENE3D.macro.height * 0.86, z: SCENE3D.macro.z },
+          { x: SCENE3D.rogue.x, y: SCENE3D.rogue.height * 0.86, z: SCENE3D.rogue.z },
+        ],
+        cam,
+        sceneRgba(palette.rogue, .32),
+        1,
+        [3, 7],
+        false,
+        -(now / 60) % 10,
+      );
       for (let i = 0; i < 2; i += 1) {
         const phase = ((now * 0.00045 + i * 0.5) % 1);
         const radius = 5 + phase * (SCENE3D.rogue.radius - 5);
@@ -3932,7 +3989,7 @@
     const towers = getSceneTowers();
     const macro = towers.find((t) => t.type === 'macro');
     const rogue = towers.find((t) => t.type === 'rogue' && !t.contained);
-    state.ues.forEach((ue) => {
+    state.ues.forEach((ue, ueIndex) => {
       if (ue.state === 'detached') return;
       const target = ue.state === 'rogue' && rogue ? rogue : macro;
       if (!target) return;
@@ -3954,11 +4011,38 @@
         });
       }
       const isRogue = ue.state === 'rogue';
+      const isData = isRogue || ue.state === 'connected';
       const color = isRogue
         ? sceneRgba(palette.rogue, .55)
         : ue.state === 'connected' ? sceneRgba(palette.connected, .26) : sceneRgba(palette.idle, .13);
-      scenePolyline(ctx, points, cam, color, isRogue ? 1.2 : 0.9, isRogue ? [4, 4] : null, false, isRogue ? -(now / 80) % 8 : 0);
+      scenePolyline(ctx, points, cam, color, isRogue ? 1.2 : 0.9, isData ? [4, 4] : null, false, isData ? -(now / (isRogue ? 80 : 240)) % 8 : 0);
+      if (now > 0 && isData) drawScenePacket(ctx, points, cam, now, ueIndex, isRogue, palette);
     });
+  }
+
+  /* Traffic pulses ride each serving link: teal packets flow macro -> UE and
+     rose packets flow UE -> fake BTS, a visual read of the synthetic
+     identity-exposure narrative. Frozen to nothing under reduced motion. */
+  function drawScenePacket(ctx, points, cam, now, ueIndex, isRogue, palette) {
+    const speed = isRogue ? 0.00042 : 0.00028;
+    const phase = (now * speed + (ueIndex % 7) * 0.143) % 1;
+    const f = isRogue ? 1 - phase : phase;
+    const at = f * (points.length - 1);
+    const i0 = Math.floor(at);
+    const i1 = Math.min(points.length - 1, i0 + 1);
+    const mix = at - i0;
+    const world = {
+      x: points[i0].x + (points[i1].x - points[i0].x) * mix,
+      y: points[i0].y + (points[i1].y - points[i0].y) * mix,
+      z: points[i0].z + (points[i1].z - points[i0].z) * mix,
+    };
+    const screen = sceneProject(world, cam);
+    if (!screen) return;
+    const fade = Math.sin(phase * Math.PI);
+    ctx.beginPath();
+    ctx.arc(screen.x, screen.y, isRogue ? 2 : 1.7, 0, TAU);
+    ctx.fillStyle = isRogue ? sceneRgba(palette.rogue, .8 * fade) : sceneRgba(palette.connected, .7 * fade);
+    ctx.fill();
   }
 
   function drawSceneTower(ctx, t, cam, now) {
@@ -4060,7 +4144,7 @@
     }
 
     if (selected) {
-      drawGroundCircle(ctx, cam, t.x, t.z, baseRadius * 2.7, sceneRgba(palette.macro, .85), 1.4, [4, 4]);
+      drawGroundCircle(ctx, cam, t.x, t.z, baseRadius * 2.7, sceneRgba(palette.macro, .85), 1.4, [4, 4], -(now / 110) % 8);
     }
 
     const showLabel = scene.layers.labels && (
@@ -4119,8 +4203,9 @@
     }
 
     const radius = clamp(point.s * 0.68, 3.4, 7);
+    const breathe = ue.state === 'connected' ? 1 : 0.78 + 0.22 * (0.5 + 0.5 * Math.sin(now / 1400 + node.x * 0.37 + node.z * 0.23));
     const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 2.8);
-    glow.addColorStop(0, sceneRgba(color, (selected || hovered ? 0.55 : 0.3) * alpha));
+    glow.addColorStop(0, sceneRgba(color, (selected || hovered ? 0.55 : 0.3) * alpha * breathe));
     glow.addColorStop(1, sceneRgba(color, 0));
     ctx.fillStyle = glow;
     ctx.beginPath();
@@ -4819,7 +4904,13 @@
     if (!scene.ready || scene.running || !scene.active) return;
     scene.running = true;
     scene.lastFrame = 0;
-    scene.raf = requestAnimationFrame(sceneFrame);
+    /* v1.7.0: begin one frame late so a tab switch's first paint — the frame
+       the click interaction is measured against — is never blocked by a full
+       scene redraw; the canvas shows its last frame until the loop takes over. */
+    scene.raf = requestAnimationFrame(() => {
+      if (!scene.running || !scene.active) return;
+      scene.raf = requestAnimationFrame(sceneFrame);
+    });
   }
 
   function sceneStop() {
@@ -4832,10 +4923,22 @@
     if (!scene.ready || !scene.canvas || !scene.stage) return;
     const rect = scene.stage.getBoundingClientRect();
     if (rect.width < 10 || rect.height < 10) return;
+    /* v1.7.0: skip the canvas backing-store realloc (clears + reallocates the
+       bitmap) when the size and DPR are unchanged, e.g. every warm tab switch. */
     const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.round(rect.width);
+    const h = Math.round(rect.height);
+    if (scene.w === w && scene.h === h && scene.dpr === dpr) {
+      /* v1.7.0: warm re-activation — the canvas still holds its last frame and
+         the scene loop (started right after) repaints it, so keep a full
+         redraw off the click's critical paint path. Sync-draw only for static
+         contexts (scene not active and not running). */
+      if (!scene.active && !scene.running) drawScene(performance.now());
+      return;
+    }
     scene.dpr = dpr;
-    scene.w = rect.width;
-    scene.h = rect.height;
+    scene.w = w;
+    scene.h = h;
     scene.canvas.width = Math.round(rect.width * dpr);
     scene.canvas.height = Math.round(rect.height * dpr);
     scene.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -4910,9 +5013,24 @@
 
   function sceneSetActive(active) {
     if (active) {
-      initScene3D();
+      /* v1.7.0: mark active before init/resize so the warm-switch resize guard
+         defers the redraw to the scene loop instead of the click path. */
       scene.active = true;
+      initScene3D();
       resizeScene3D();
+      if (!scene.everActivated && !scene.reduced) {
+        /* One-time arrival tween: start wider and higher, settle into Iso. */
+        scene.everActivated = true;
+        const iso = SCENE_PRESETS.iso;
+        scene.camera = {
+          theta: iso.theta + 0.55,
+          phi: Math.min(1.36, iso.phi + 0.28),
+          zoom: clamp(iso.zoom * 0.72, 0.55, 2.1),
+          target: { ...iso.target },
+        };
+        sceneTweenTo(iso, 1150);
+      }
+      scene.everActivated = true;
       sceneStart();
       scene.telemetryAt = 0;
       updateSceneTelemetry(performance.now());
@@ -5005,6 +5123,7 @@
     const hash = (location.hash || '').replace('#', '') || 'overview';
     if (!TAB_NAMES.includes(hash) || hash === state.tab) return;
     setTab(hash, { noScroll: true, history: 'none' });
+    if (gateOpen()) enterApp({ focus: false });
   }
 
   function runAttachDemo() {
@@ -5418,6 +5537,8 @@
     });
     window.addEventListener('hashchange', applyRouteFromHash);
     window.addEventListener('popstate', applyRouteFromHash);
+    $('#gateEnter')?.addEventListener('click', () => enterApp());
+    $('#gateSkip')?.addEventListener('click', () => enterApp());
 
     $('#addFakeBtn')?.addEventListener('click', openFakeModal);
     $('#addFakeBtn2')?.addEventListener('click', openFakeModal);
@@ -5593,6 +5714,11 @@
     });
 
     document.addEventListener('keydown', (event) => {
+      if (gateOpen()) {
+        if (event.key === 'Tab') trapFocus(event, gateEl());
+        else if (event.key === 'Escape') { event.preventDefault(); enterApp({ focus: false }); }
+        return;
+      }
       if ((event.ctrlKey || event.metaKey) && !event.altKey && String(event.key).toLowerCase() === 'k') {
         event.preventDefault();
         if ($('#modalRoot .palette-modal')) closeModal();
@@ -5681,7 +5807,9 @@
     syncNocData();
     setText('#appVersionTag', 'v' + APP_VERSION);
     const hash = (location.hash || '').replace('#', '');
+    const hadHash = !!hash;
     setTab(hash || 'overview', { noScroll: true, history: 'replace' });
+    initGate(hadHash);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
